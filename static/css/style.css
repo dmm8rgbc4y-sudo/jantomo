@@ -1,0 +1,917 @@
+:root {
+    --main-color: #009870;
+    --accent-color: #00b384;
+    --bg-color: #f9f9f9;
+    --text-color: #333;
+}
+
+body {
+    font-family: 'Segoe UI', 'Noto Sans JP', sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+header {
+    background-color: var(--main-color);
+    color: white;
+    text-align: center;
+    padding: 12px;
+    font-size: 18px;
+    position: sticky;
+    top: 0;
+}
+
+/* === 共通ヘッダー＆ナビ === */
+
+/* ヘッダー内配置 */
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.profile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--accent-color);  /* 抹茶グリーンのワンポイント */
+  text-decoration: none;
+}
+
+.profile-icon:hover {
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.profile-icon svg {
+  fill: white;  /* SVGの塗りを白に固定 */
+}
+
+/* --- ナビゲーションタブ全体 --- */
+.nav-tabs {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 48px; /* ヘッダー高さ分 */
+  z-index: 998;
+}
+
+/* --- 通常タブ（非アクティブ） --- */
+.nav-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  color: var(--main-color);         /* 抹茶グリーン文字 */
+  background-color: #ffffff;        /* 白背景 */
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.nav-tab:hover {
+  background-color: #e8f5ef;        /* ホバー時に淡い抹茶 */
+}
+
+/* --- アクティブタブ（選択中） --- */
+.nav-tab.active {
+  border-bottom: 3px solid var(--main-color);
+  background-color: #e0e0e0;        /* 淡いグレー背景 */
+  color: var(--main-color);         /* 抹茶グリーン文字 */
+  font-weight: 700;
+}
+
+main {
+    padding: 16px;
+    min-height: 80vh;
+}
+
+footer {
+    background-color: #eee;
+    color: #555;
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    position: sticky;
+    bottom: 0;
+}
+
+button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* スマホ用レイアウト調整 */
+.container {
+    max-width: 480px;
+    margin: auto;
+}
+
+/* リンク */
+a {
+    color: var(--main-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* フォーム共通 */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+/* ② ここから日程入力ページ（schedule.html）専用のCSSを追加 */
+:root {
+  --accent-day: #e74c3c;   /* 昼 → 赤（温かい） */
+  --accent-night: #3498db; /* 夜 → 青（落ち着いた） */
+  --accent-both: #27ae60;  /* 両方 → 緑（そのまま） */
+}
+
+/* ===  週ナビゲーション（前の週／次の週） === */
+.week-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+.week-nav a {
+  color: var(--main-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.week-nav a:hover {
+  text-decoration: underline;
+}
+
+/* 日程入力行 */
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* 日付ラベル */
+.date-label {
+  width: 120px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 時間帯ボタン */
+.time-btn {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .05s ease-in, background .15s ease;
+}
+
+.time-btn:hover {
+  transform: translateY(-1px);
+  background: #f3f6f8;
+}
+
+/* 選択されたボタンの色変化 */
+.time-btn.selected[data-slot="day"] {
+  border-color: var(--accent-day);
+  background: #fdecea;       /* 淡い赤 */
+  color: #333;      
+}
+.time-btn.selected[data-slot="night"] {
+  border-color: var(--accent-night);
+  background: #ecf6ff;       /* 淡い青 */
+  color: #333; 
+}
+.time-btn.selected[data-slot="both"] {
+  border-color: var(--accent-both);
+  background: #eafaf1;       /* 淡い緑 */
+  color: #333; 
+}
+
+/* flashメッセージ */
+.flash-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  color: #fff;
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+}
+.flash-message.success { background: #2ecc71; }
+.flash-message.error { background: #e74c3c; }
+.flash-message.info { background: #3498db; }   /* 明るい青系で視認性UP */
+
+/* ========== 週間スケジュール（縦1列型） ========== */
+.weekly-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.day-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+/* 🧩 スマホで日付とアイコンが重ならないよう調整 */
+.day-row {
+  justify-content: space-between; /* 左右にしっかり余白を取る */
+  gap: 16px;                      /* 日付とアイコンの間に余白 */
+}
+
+.date-label {
+  min-width: 100px;               /* 日付部分を固定幅にして崩れ防止 */
+  flex-shrink: 0;                 /* 縮まないよう固定 */
+}
+
+.date-label {
+  width: 100px;
+  font-weight: 600;
+  color: #333;
+}
+
+.icon-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icon-frame {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.icon-day { border-color: #e74c3c; }   /* 昼 → 赤 */
+.icon-night { border-color: #3498db; } /* 夜 → 青 */
+.icon-both { border-color: #27ae60; }  /* 両方 → 緑 */
+
+.icon-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.no-icon {
+  color: #aaa;
+  font-size: 12px;
+}
+
+/* ========== 友達一覧ページ (friends.html) ========== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--main-color);
+  color: white;
+  padding: 6px 12px;   /* ← 🔽 高さを抑える */
+  font-size: 15px;     /* ← 🔽 少し小さくしてバランス調整 */
+  border-radius: 6px;
+  height: 36px;        /* ← 固定高さを加えると安定 */
+}
+
+.add-friend-btn {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.add-friend-btn:hover {
+  opacity: 0.85;
+}
+
+.friends-list {
+  padding: 10px;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px 8px;        /* ← 以前より少し小さく */
+  margin-bottom: 4px;      /* ← 行間も詰める */
+  background-color: #fff;
+  min-height: 40px;        /* ← コンパクトに固定 */
+}
+
+/* 🔹 フレンド一覧：削除ボタンまわりの余白と枠を削除 */
+.friend-item form {
+  margin: 0;              /* デフォルトマージンを除去 */
+  padding: 0;             /* 内側余白も除去 */
+  border: none;           /* 不要な枠線を除去 */
+  box-shadow: none;       /* 不要な影を除去 */
+  background: transparent;/* 背景を完全透明化 */
+}
+
+/* 🔹 各行の高さと余白をさらにコンパクトに */
+.friend-item {
+  padding: 2px 8px;       /* 行内の上下余白をさらに削減 */
+  min-height: 34px;       /* 高さを40px未満に調整 */
+}
+
+.friend-icon {
+  width: 26px;
+  height: 26px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 26px;
+  font-weight: 600;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.friend-name {
+  flex-grow: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  opacity: 0.9;
+}
+
+.no-friends {
+  text-align: center;
+  color: #666;
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+/* ========== 友達申請ページ (friend_request.html) ========== */
+.friend-request-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.friend-request-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.friend-request-container input[type="text"] {
+  width: 100%;                   /* ← これを明示的に追加 */
+  box-sizing: border-box;         /* ← パディング込みで100%に */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  margin: 0 auto;                 /* ← Safariでの位置ズレ防止 */
+  display: block;                 /* ← inline残留を防止 */
+}
+
+.friend-request-container button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.friend-request-container button:hover {
+  opacity: 0.9;
+}
+
+/* ========== 友達申請受領ページ (friend_inbox.html) ========== */
+.friend-inbox {
+  padding: 16px;
+}
+
+.request-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  background-color: #fff;
+}
+
+.request-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.request-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 32px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.request-name {
+  flex-grow: 1;
+  font-size: 15px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.accept-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reject-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.no-requests {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+}
+
+.friend-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.inbox-btn {
+  background-color: var(--accent-color); /* 抹茶グリーンで統一 */
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.inbox-btn:hover {
+  opacity: 0.85;
+}
+
+/* ================================
+   🎨 最終UI調整
+================================ */
+
+/* 全体余白・フォント統一 */
+main {
+  padding: 20px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* セクションタイトル */
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--main-color);
+  margin-bottom: 12px;
+}
+
+/* カード型要素の間隔統一 */
+.friend-item,
+.request-card {
+  margin-bottom: 12px;  /* 統一感アップ */
+  padding: 10px 14px;
+}
+
+/* フォームのgap統一 */
+form {
+  gap: 12px;
+}
+
+/* ボタン（共通） */
+button,
+.add-friend-btn,
+.inbox-btn,
+.accept-btn,
+.reject-btn,
+.delete-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* メイン背景の調和 */
+body {
+  background-color: #fafafa; /* わずかに明るめ */
+}
+
+/* ページ下余白（最終行が詰まらないように） */
+footer {
+  margin-top: 20px;
+}
+
+.page-header h2 {
+  color: white; /* 背景とコントラストを確保 */
+  margin: 0;    /* 上下余白をリセット（中央揃え） */
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* =====================================
+   🧾 登録／ログインページ用デザイン追加
+===================================== */
+
+/* フラッシュメッセージ（下からふわっと） */
+.flash-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  color: #fff;
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  animation: fadeInUp 0.3s ease;
+}
+.flash-message.success { background: #2ecc71; }
+.flash-message.error { background: #e74c3c; }
+.flash-message.info { background: #3498db; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* 登録・ログインフォーム全体 */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 320px;
+  margin: 24px auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+/* ラベルと入力欄 */
+form label {
+  font-weight: 600;
+  color: #444;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+form input:focus {
+  border-color: var(--main-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,152,112,0.15);
+}
+
+/* ボタン */
+form button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+form button:hover {
+  opacity: 0.9;
+}
+
+/* 下部リンク */
+p a {
+  color: var(--main-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+p a:hover {
+  text-decoration: underline;
+}
+
+/* タイトル */
+h2 {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--main-color);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* =====================================
+   🪶 ユーザー名ツールチップ（週間画面）
+===================================== */
+.icon-frame {
+  position: relative;
+}
+
+.icon-frame:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 120%;               /* アイコンの上に表示 */
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--main-color);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000;
+  animation: tooltipFade 0.15s forwards ease-in;
+}
+
+/* 吹き出し用の矢印（小さい▲） */
+.icon-frame:hover::before {
+  content: "";
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--main-color);
+  z-index: 999;
+  opacity: 0;
+  animation: tooltipFade 0.15s forwards ease-in;
+}
+
+/* フェードインアニメーション */
+@keyframes tooltipFade {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 0.95; transform: translate(-50%, 0); }
+}
+
+/* ========== プロフィールページ (profile.html) ========== */
+.profile-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 24px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.profile-list li {
+  padding: 8px 4px;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+  color: #333;
+}
+
+.profile-list li:last-child {
+  border-bottom: none;
+}
+
+form button {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+form button:hover {
+  opacity: 0.9;
+}
+
+/* 🧩 アイコン内テキストにクリック判定を持たせない */
+.icon-text {
+  pointer-events: none;
+}
+
+/* 🧩 iOS Safariでのテキスト選択・長押しメニューを完全に無効化 */
+.icon-frame,
+.icon-frame * {
+  -webkit-user-select: none; /* テキスト選択禁止 */
+  -webkit-touch-callout: none; /* 長押しメニュー無効化 */
+  user-select: none;
+  touch-action: manipulation;  /* タップ時の余計な挙動を抑制 */
+  cursor: pointer;
+}
+
+/* === 友達申請ページの横ズレ補正（iOS含む） === */
+.friend-request-container {
+  padding-left: 16px;
+  padding-right: 16px;           /* 左右の余白を対称に */
+  box-sizing: border-box;
+}
+
+.friend-request-container form {
+  max-width: 360px;              /* 中央のカード幅 */
+  width: 100%;
+  margin-left: auto;             /* 完全中央寄せ */
+  margin-right: auto;
+  padding-left: 16px;            /* 左右パディングを対称に */
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+.friend-request-container label {
+  display: block;                 /* Safariのインライン余白を排除 */
+  margin: 0 0 4px 0;
+}
+
+.friend-request-container input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;       /* 必要に応じて丸みを残す */
+  background-color: #fff;   /* Safariデフォルト背景を上書き */
+  padding: 10px;
+  font-size: 16px;
+  outline: none;            /* フォーカス時の青枠を消す */
+  box-shadow: none;         /* iOS特有の内側影を無効化 */
+}
+
+.friend-request-container button {
+  width: 100%;                    /* ボタンも左右対称に */
+  box-sizing: border-box;
+}
+
+/* ===============================
+   🗓️ 日程入力画面 最終安定版（SE〜12 Pro対応）
+   2025-11-08
+================================= */
+
+/* 各行（日付＋ボタン3つ） */
+.date-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px; /* ← 余白さらに微調整（8→6）でバランス確保 */
+}
+
+/* 日付ラベル */
+.date-label {
+  width: 110px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 昼／夜／両方ボタン */
+.time-btn {
+  flex: 0 0 76px;   /* ← 80→76に微縮小（SEで1行キープ） */
+  text-align: center;
+  padding: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .05s ease-in, background .15s ease;
+}
+
+.time-btn:hover {
+  transform: translateY(-1px);
+  background: #f3f6f8;
+}
+
+/* 選択時の配色（既存維持） */
+.time-btn.selected[data-slot="day"] {
+  border-color: var(--accent-day);
+  background: #fdecea;
+}
+.time-btn.selected[data-slot="night"] {
+  border-color: var(--accent-night);
+  background: #ecf6ff;
+}
+.time-btn.selected[data-slot="both"] {
+  border-color: var(--accent-both);
+  background: #eafaf1;
+}
+
+/* 決定ボタン */
+#save-btn {
+  width: 76%;          /* ← 横幅アップ（75→76） */
+  max-width: 360px;    /* ← タブレットでは広がりすぎない */
+  display: block;
+  margin: 26px auto 42px;
+  padding: 16px 0;     /* ← 高さアップで押しやすく */
+  font-size: 19px;     /* ← 文字サイズ拡大 */
+  font-weight: 700;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 10px; /* ← 丸み少し強調 */
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+#save-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}

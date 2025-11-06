@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}プロフィール{% endblock %}
+
+{% block content %}
+<h2>プロフィール情報</h2>
+
+<ul class="profile-list">
+  <li><strong>ユーザー名：</strong> {{ username }}</li>
+  <li><strong>登録日：</strong> {{ created_at }}</li>
+  <li><strong>友達登録数：</strong> {{ friend_count }}人</li>
+</ul>
+
+<form action="{{ url_for('auth.logout') }}" method="get">
+  <button type="submit">ログアウト</button>
+</form>
+{% endblock %}

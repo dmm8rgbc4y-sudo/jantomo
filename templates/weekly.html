@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}週間予定 - じゃんとも{% endblock %}
+
+{% block content %}
+
+<!-- 週ナビゲーション -->
+<div class="week-nav">
+  <a href="{{ url_for('schedule.weekly', week=week_offset - 1) }}">＜ 前の週</a>
+  <strong>{{ dates[0].strftime("%m/%d") }} ～ {{ dates[-1].strftime("%m/%d") }}</strong>
+  <a href="{{ url_for('schedule.weekly', week=week_offset + 1) }}">次の週 ＞</a>
+</div>
+
+<!-- 日ごとのスケジュール -->
+<div class="weekly-list">
+  {% for d in dates %}
+    {% set day_key = d.strftime('%Y-%m-%d') %}
+    <div class="day-row">
+      <div class="date-label">{{ d.strftime('%m/%d(%a)') }}</div>
+      <div class="icon-group">
+        {% if data[day_key] and data[day_key]|length > 0 %}
+          {% for item in data[day_key] %}
+            <div class="icon-frame 
+                        {% if item.slot == '昼' %}icon-day
+                        {% elif item.slot == '夜' %}icon-night
+                        {% else %}icon-both{% endif %}"
+                 title="{{ item.name }}">
+              <span class="icon-text">{{ item.name[0] }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="no-icon">－</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

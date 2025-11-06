@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}友達一覧 - じゃんとも{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h2>友達一覧</h2>
+  <div class="friend-header-buttons">
+    <a href="{{ url_for('friend.friend_request') }}" class="add-friend-btn">＋ 友達を追加</a>
+    <a href="{{ url_for('friend.friend_inbox') }}" class="inbox-btn">申請受領</a>
+  </div>
+</header>
+
+<div class="friends-list">
+  {% if friends %}
+    {% for f in friends %}
+      <div class="friend-item">
+        <div class="friend-icon">{{ f.username[0] }}</div>
+        <div class="friend-name">{{ f.username }}</div>
+        <form method="POST" action="{{ url_for('friend.friend_delete') }}">
+          <input type="hidden" name="friend_id" value="{{ f.id }}">
+          <button type="submit" class="delete-btn">削除</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="no-friends">友達がまだいません。</p>
+  {% endif %}
+</div>
+{% endblock %}

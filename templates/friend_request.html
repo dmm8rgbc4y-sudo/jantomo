@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}友達申請 - じゃんとも{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <h2>友達を追加</h2>
+</header>
+
+<main class="friend-request-container">
+  <form method="POST">
+    <label for="username">ユーザー名を入力してください：</label>
+    <input type="text" name="username" id="username" placeholder="例：Taro" required>
+    <button type="submit">申請する</button>
+  </form>
+</main>
+
+{% endblock %}

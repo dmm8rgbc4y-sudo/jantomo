@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}{% if mode == 'login' %}ログイン{% else %}新規登録{% endif %}{% endblock %}
+
+{% block content %}
+<h2>{% if mode == 'login' %}ログイン{% else %}新規登録{% endif %}</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="POST">
+  <label>ユーザー名：</label>
+  <input type="text" name="username" placeholder="例：Taro" required>
+  <button type="submit">
+    {% if mode == 'login' %}ログイン{% else %}登録して始める{% endif %}
+  </button>
+</form>
+
+{% if mode == 'login' %}
+  <p style="margin-top: 12px; text-align:center;">
+    アカウントをお持ちでない方は<br>
+    <a href="{{ url_for('auth.register') }}">新規登録はこちら</a>
+  </p>
+{% else %}
+  <p style="margin-top: 12px; text-align:center;">
+    すでに登録済みの方は<br>
+    <a href="{{ url_for('auth.login') }}">ログインはこちら</a>
+  </p>
+{% endif %}
+{% endblock %}

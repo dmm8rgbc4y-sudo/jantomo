@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}日程入力 - じゃんとも{% endblock %}
+
+{% block content %}
+
+<!-- 週ナビゲーション -->
+<div class="week-nav">
+  <a href="{{ url_for('schedule.schedule', week=week_offset - 1) }}">＜ 前の週</a>
+  <strong>{{ dates[0].strftime("%m/%d") }} ～ {{ dates[-1].strftime("%m/%d") }}</strong>
+  <a href="{{ url_for('schedule.schedule', week=week_offset + 1) }}">次の週 ＞</a>
+</div>
+
+<div id="schedule-container">
+  {% for d in dates %}
+  {% set saved_type = saved_dict.get(d.strftime('%Y-%m-%d')) %}
+  <div class="date-row"
+       data-date="{{ d.strftime('%Y-%m-%d') }}"
+       data-prev-slot="{{ saved_dict.get(d.strftime('%Y-%m-%d'), '') }}">
+    <span class="date-label">{{ d.strftime('%m/%d(%a)') }}</span>
+    <button class="time-btn {% if saved_type == '昼' %}selected{% endif %}" data-slot="day">昼</button>
+    <button class="time-btn {% if saved_type == '夜' %}selected{% endif %}" data-slot="night">夜</button>
+    <button class="time-btn {% if saved_type == '両方' %}selected{% endif %}" data-slot="both">両方</button>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="text-align:center; margin-top: 20px;">
+  <button id="save-btn">決定</button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- JavaScript 読み込み -->
+<script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}

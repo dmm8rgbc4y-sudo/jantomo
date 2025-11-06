@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}友達申請受領 - じゃんとも{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h2>友達申請受領</h2>
+</header>
+
+<main class="friend-inbox">
+  {% if requests %}
+    {% for r in requests %}
+      <form method="POST" class="request-card">
+        <div class="request-info">
+          <div class="request-icon">{{ r.username[0] }}</div>
+          <div class="request-name">{{ r.username }} さんから申請が届いています</div>
+        </div>
+        <input type="hidden" name="from_user_id" value="{{ r.id }}">
+        <div class="request-actions">
+          <button type="submit" name="action" value="accept" class="accept-btn">承認</button>
+          <button type="submit" name="action" value="reject" class="reject-btn">拒否</button>
+        </div>
+      </form>
+    {% endfor %}
+  {% else %}
+    <p class="no-requests">申請はありません。</p>
+  {% endif %}
+</main>
+{% endblock %}
