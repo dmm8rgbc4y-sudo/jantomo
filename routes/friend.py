@@ -166,11 +166,11 @@ def friend_inbox():
 
     return render_template('friend_inbox.html', requests=request_data)
 
-@friend_bp.route("/pending-count")
+@friend_bp.route("/friend/pending-count")
 @login_required
 def pending_count():
-    from models.friend_request import FriendRequest
-    count = FriendRequest.query.filter_by(
-        to_user_id=current_user.id, status="pending"
-    ).count()
+    """
+    自分宛ての承認待ち(friend_id=current_user.id, status='pending')の件数を返す
+    """
+    count = Friend.query.filter_by(friend_id=current_user.id, status="pending").count()
     return jsonify({"count": count})
