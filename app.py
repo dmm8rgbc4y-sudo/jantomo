@@ -17,7 +17,10 @@ def create_app():
     
     # --- DB格納場所の設定 ---
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'jantomo.db')}"
+    default_db = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'jantomo.db')}"
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+        'DATABASE_URL', default_db
+    ).replace("postgres://", "postgresql://")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # --- グローバル変数の初期化 ---
