@@ -65,4 +65,9 @@ def create_app():
 # --- アプリ起動 ---
 if __name__ == '__main__':
     app = create_app()
+
+    # 🚀 Renderデプロイ時にPostgreSQLのテーブルを自動作成
+    with app.app_context():
+        db.create_all()
+        
     app.run(debug=True)
