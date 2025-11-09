@@ -120,7 +120,7 @@ def friend_request():
 # ==========================================
 # 📬 友達申請受領ページ（inbox）
 # ==========================================
-from flask import request, redirect, url_for
+from flask import request, redirect, url_for, jsonify
 
 @friend_bp.route('/friend/inbox', methods=['GET', 'POST'])
 @login_required
@@ -165,3 +165,12 @@ def friend_inbox():
             request_data.append(from_user)
 
     return render_template('friend_inbox.html', requests=request_data)
+
+@friend_bp.route("/pending-count")
+@login_required
+def pending_count():
+    from models.friend_request import FriendRequest
+    count = FriendRequest.query.filter_by(
+        to_user_id=current_user.id, status="pending"
+    ).count()
+    return jsonify({"count": count})

@@ -6,7 +6,10 @@
   <h2>友達一覧</h2>
   <div class="friend-header-buttons">
     <a href="{{ url_for('friend.friend_request') }}" class="add-friend-btn">＋ 友達を追加</a>
-    <a href="{{ url_for('friend.friend_inbox') }}" class="inbox-btn">申請受領</a>
+    <a href="{{ url_for('friend.friend_inbox') }}" class="inbox-btn" id="inbox-btn">
+      申請受領
+      <span id="inbox-badge" class="badge"></span>
+    </a>
   </div>
 </header>
 
@@ -26,4 +29,30 @@
     <p class="no-friends">友達がまだいません。</p>
   {% endif %}
 </div>
+
+<!-- 🔔 バッジ更新用スクリプト -->
+<script>
+async function updateInboxBadge() {
+  try {
+    const res = await fetch("/friend/pending-count");
+    if (!res.ok) return;
+    const data = await res.json();
+    const badge = document.getElementById("inbox-badge");
+    if (data.count > 0) {
+      badge.textContent = data.count;
+      badge.style.display = "inline";
+    } else {
+      badge.style.display = "none";
+    }
+  } catch (err) {
+    console.error("バッジ更新失敗:", err);
+  }
+}
+
+// ページ読み込み時に実行
+document.addEventListener("DOMContentLoaded", updateInboxBadge);
+
+// 30秒ごとに更新
+setInterval(updateInboxBadge, 30000);
+</script>
 {% endblock %}
