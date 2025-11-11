@@ -16,7 +16,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function() {
-          navigator.serviceWorker.register("/sw.js")
+          navigator.serviceWorker.register("{{ url_for('static', filename='js/sw.js') }}")
             .then(function(reg) {
               console.log("Service Worker registered:", reg.scope);
             })
@@ -45,21 +45,23 @@
         </div>
     </header>
 
+    <!-- 📱 PWA案内（共通文言のみ） -->
+    <div id="pwa-banner" class="pwa-banner hidden">
+      <p>ホーム画面に追加することで、<br>アプリのように簡単に使えます。</p>
+    </div>
+
     <!-- ナビゲーションバー -->
     <nav class="nav-tabs">
-        <!-- 日程入力 -->
         <a href="{{ url_for('schedule.schedule') }}"
         class="nav-tab {% if request.endpoint == 'schedule.schedule' %}active{% endif %}">
         日程入力
         </a>
 
-        <!-- 週間 -->
         <a href="{{ url_for('schedule.weekly') }}"
         class="nav-tab {% if request.endpoint == 'schedule.weekly' %}active{% endif %}">
         週間
         </a>
 
-        <!-- 友達 -->
         <a href="{{ url_for('friend.friend_list') }}"
         class="nav-tab {% if request.endpoint.startswith('friend') %}active{% endif %}">
         友達
@@ -84,6 +86,9 @@
         </div>
       {% endif %}
     {% endwith %}
+
+    <!-- PWA案内スクリプト -->
+    <script src="{{ url_for('static', filename='js/pwa_prompt.js') }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>

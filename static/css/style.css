@@ -934,3 +934,68 @@ form button:hover {
   font-weight: bold;
   display: none;
 }
+
+/* ===============================
+   🟩 週間予定画面：凡例表示
+   2025-11-10 追加
+================================= */
+
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;         /* スマホで折り返し対応 */
+  gap: 14px;
+  margin: 10px 0 18px;     /* 上下余白をやや広めに */
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-box {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* 枠線色と完全一致 */
+.legend-box.red   { background-color: #e74c3c; }  /* 昼 */
+.legend-box.blue  { background-color: #3498db; }  /* 夜 */
+.legend-box.green { background-color: #27ae60; }  /* 両方 */
+
+/* ===============================
+   📱 PWA案内（registerページ限定表示）
+   2025-11-11 調整版
+================================= */
+.pwa-banner {
+  background-color: #e6fff3;
+  border: 1px solid #00b384;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 20px 12px;      /* ← 左右に20pxの余白を追加 */
+  max-width: 440px;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.5;            /* ← 改行後も自然に見えるように */
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-in;
+}
+
+.pwa-banner p {
+  margin: 4px 0;
+  white-space: pre-line;       /* ← 改行を反映させる */
+}
+
+.hidden {
+  display: none;
+}
+
+/* フェードイン効果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+

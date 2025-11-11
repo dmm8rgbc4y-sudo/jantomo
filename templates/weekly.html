@@ -10,6 +10,13 @@
   <a href="{{ url_for('schedule.weekly', week=week_offset + 1) }}">次の週 ＞</a>
 </div>
 
+<!-- 凡例（上部配置・シンプル表示） -->
+<div class="legend">
+  <div><span class="legend-box red"></span> 昼</div>
+  <div><span class="legend-box blue"></span> 夜</div>
+  <div><span class="legend-box green"></span> 両方</div>
+</div>
+
 <!-- 日ごとのスケジュール -->
 <div class="weekly-list">
   {% for d in dates %}
