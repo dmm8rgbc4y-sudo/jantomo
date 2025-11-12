@@ -998,4 +998,28 @@ form button:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===============================
+   🧩 週間画面ヘッダーのアイコンはみ出し対策
+   2025-11-12 追加
+================================= */
+
+/* ヘッダー全体のオーバーフローを抑制 */
+header {
+  overflow: hidden; /* ← アイコンのはみ出しを防止 */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--main-color);
+}
+
+/* 友達アイコンリスト */
+.friend-icons {
+  display: flex;
+  flex-wrap: wrap;           /* 2行表示を許可 */
+  justify-content: center;   /* アイコンを中央寄せ */
+  gap: 8px;
+  overflow: hidden;          /* ← ヘッダー外へのはみ出しを防止 */
+  max-height: 72px;          /* ← 2行分の高さ制限（1行36px × 2行） */
+  transition: max-height 0.2s ease;
+}
 
