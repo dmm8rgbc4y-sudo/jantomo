@@ -17,7 +17,12 @@ class User(db.Model, UserMixin):
 # --- Scheduleモデル ---
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # ondelete='CASCADE' を追加
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id', ondelete='CASCADE'),
+        nullable=False
+    )
     date = db.Column(db.String(20), nullable=False)
     time_type = db.Column(db.String(10), nullable=False)  # '昼', '夜', '両方'
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

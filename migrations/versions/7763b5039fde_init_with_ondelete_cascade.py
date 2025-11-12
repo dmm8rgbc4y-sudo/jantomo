@@ -1,8 +1,8 @@
-"""initial schema
+"""init with ondelete cascade
 
-Revision ID: c2ea6f876941
+Revision ID: 7763b5039fde
 Revises: 
-Create Date: 2025-11-05 00:11:17.541216
+Create Date: 2025-11-12 12:19:40.759479
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c2ea6f876941'
+revision = '7763b5039fde'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,14 +27,25 @@ def upgrade():
     sa.UniqueConstraint('device_token'),
     sa.UniqueConstraint('username')
     )
+    op.create_table('device',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.String(length=64), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('expires_at', sa.DateTime(), nullable=True),
+    sa.Column('is_revoked', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('token')
+    )
     op.create_table('friend',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('friend_id', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(length=20), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['friend_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['friend_id'], ['user.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('friend_request',
@@ -43,8 +54,8 @@ def upgrade():
     sa.Column('receiver_id', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(length=10), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['receiver_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['sender_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['receiver_id'], ['user.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['sender_id'], ['user.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('schedule',
@@ -53,7 +64,7 @@ def upgrade():
     sa.Column('date', sa.String(length=20), nullable=False),
     sa.Column('time_type', sa.String(length=10), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -64,5 +75,6 @@ def downgrade():
     op.drop_table('schedule')
     op.drop_table('friend_request')
     op.drop_table('friend')
+    op.drop_table('device')
     op.drop_table('user')
     # ### end Alembic commands ###
