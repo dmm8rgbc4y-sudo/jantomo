@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta, timezone
 from app import db
 from models.models import User
-from models.device import Device  # ← 別途追加するDeviceモデルを前提
+from models.device import Device
 import secrets
 
 auth_bp = Blueprint('auth', __name__)
@@ -15,7 +15,6 @@ TOKEN_TTL_DAYS = 30
 
 
 def _issue_device_token(user_id: int) -> str:
-    """デバイス用トークンを新規発行し、DBへ登録して返す"""
     token = secrets.token_hex(32)
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(days=TOKEN_TTL_DAYS)
@@ -33,10 +32,8 @@ def _issue_device_token(user_id: int) -> str:
 
 
 def _set_login_cookie(response, token: str):
-    """本番向けセキュア属性でCookieを設定"""
-    # ローカル開発中（debug=True）は secure=False、本番はTrueを推奨
     secure_flag = not current_app.debug
-    max_age = TOKEN_TTL_DAYS * 24 * 60 * 60  # 秒
+    max_age = TOKEN_TTL_DAYS * 24 * 60 * 60
 
     response.set_cookie(
         COOKIE_NAME,
@@ -64,25 +61,22 @@ def register():
             flash('このユーザー名は既に登録されています。', 'error')
             return redirect(url_for('auth.register'))
 
-        # ユーザー作成（device_token列は使用しない）
         new_user = User(username=username, device_token=secrets.token_hex(16))
         db.session.add(new_user)
         db.session.commit()
 
-        # 即時ログイン
         login_user(new_user)
 
-        # デバイス用トークンを発行・保存してCookieへ
         token = _issue_device_token(new_user.id)
         resp = make_response(redirect(url_for('schedule.weekly')))
         _set_login_cookie(resp, token)
 
-        flash(f'登録しました！ようこそ、{username}さん。', 'success')
         return resp
 
-    return render_template('register.html')
+    return render_template('register.html', mode='register')
 
-# --- ログイン（既存ユーザー用） ---
+
+# --- ログイン ---
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -97,14 +91,7 @@ def login():
             flash('このユーザーは登録されていません。', 'error')
             return redirect(url_for('auth.login'))
 
-        # ログイン処理
         login_user(user)
-
-        # 既存トークンを無効化して新しいトークンを発行
-        from datetime import datetime, timedelta
-        from models.device import Device
-        from app import db
-        import secrets
 
         Device.query.filter_by(user_id=user.id, is_revoked=False).update({'is_revoked': True})
         db.session.commit()
@@ -118,14 +105,12 @@ def login():
         resp = make_response(redirect(url_for('schedule.weekly')))
         _set_login_cookie(resp, token)
 
-        flash(f'ようこそ、{username}さん。', 'success')
         return resp
 
-    # GET時は register.html を流用して、タイトルだけ差し替え
     return render_template('register.html', mode='login')
 
 
-# --- 自動ログイン（Cookieのデバイストークンを検証） ---
+# --- 自動ログイン ---
 @auth_bp.before_app_request
 def auto_login():
     if current_user.is_authenticated:
@@ -139,19 +124,43 @@ def auto_login():
     if not device:
         return
 
-    # 有効期限チェック
     now = datetime.utcnow()
     if device.expires_at and device.expires_at > now:
-        # 期限内ならログイン
         login_user(device.user)
     else:
-        # 期限切れならCookieだけ削除（任意でDB側の掃除は別途バッチ等で）
         resp = make_response(redirect(url_for('auth.register')))
         resp.delete_cookie(COOKIE_NAME)
         return resp
 
 
-# --- ログアウト（このデバイスのトークンを無効化） ---
+# --- 未ログインなら強制 /register ---
+@auth_bp.before_app_request
+def force_register_if_not_logged_in():
+    # すでにログイン済みならOK
+    if current_user.is_authenticated:
+        return
+
+    path = request.path
+
+    # 未ログインでもアクセスOKなパス
+    allowed_paths = [
+        '/register',
+        '/login',
+        '/static',   # CSS/JS/画像
+    ]
+
+    # 将来LP実装後に追加
+    # allowed_paths.append('/landing')
+
+    # 許可パスならそのまま
+    if any(path.startswith(p) for p in allowed_paths):
+        return
+
+    # それ以外 → /register に強制
+    return redirect(url_for('auth.register'))
+
+
+# --- ログアウト ---
 @auth_bp.route('/logout')
 @login_required
 def logout():
@@ -164,6 +173,7 @@ def logout():
             db.session.commit()
 
     logout_user()
+
     flash('ログアウトしました。', 'info')
 
     resp = make_response(redirect(url_for('auth.register')))

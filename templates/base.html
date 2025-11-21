@@ -31,6 +31,19 @@
 </head>
 
 <body>
+
+    <!-- ▼▼ iPhone専用ホーム画面追加バナー（A2HS） ▼▼ -->
+    <div id="ios-a2hs-banner" class="ios-a2hs-banner hidden">
+      <p>
+        じゃんともをもっと便利に！<br>
+        <b>① 共有ボタン</b> をタップし、<br>
+        <b>②「ホーム画面に追加」</b> を選んでください。
+      </p>
+      <button id="ios-a2hs-close">閉じる</button>
+    </div>
+    <!-- ▲▲ iPhone専用バナー ▲▲ -->
+
+
     <!-- ヘッダー -->
     <header>
         <div class="header-inner">
@@ -45,10 +58,8 @@
         </div>
     </header>
 
-    <!-- 📱 PWA案内（共通文言のみ） -->
-    <div id="pwa-banner" class="pwa-banner hidden">
-      <p>ホーム画面に追加することで、<br>アプリのように簡単に使えます。</p>
-    </div>
+    <!-- 📱（Android向け）旧PWA案内バナーは削除済み -->
+    <div id="pwa-banner" class="pwa-banner hidden"></div>
 
     <!-- ナビゲーションバー -->
     <nav class="nav-tabs">
@@ -87,8 +98,9 @@
       {% endif %}
     {% endwith %}
 
-    <!-- PWA案内スクリプト -->
-    <script src="{{ url_for('static', filename='js/pwa_prompt.js') }}"></script>
+    <!-- ▼ iPhone専用A2HSスクリプト -->
+    <script src="{{ url_for('static', filename='js/ios_a2hs.js') }}"></script>
+    <!-- ▲ -->
 
     {% block scripts %}{% endblock %}
 </body>

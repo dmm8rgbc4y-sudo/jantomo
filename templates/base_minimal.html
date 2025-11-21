@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}じゃんとも{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- manifest.json -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#009870">
+
+    <!-- Service Worker登録（PWA準備のみ） -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker.register("{{ url_for('static', filename='js/sw.js') }}")
+            .then(function(reg) {
+              console.log("SW(registration from minimal):", reg.scope);
+            })
+            .catch(function(err) {
+              console.error("SW registration failed:", err);
+            });
+        });
+      }
+    </script>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ヘッダー（タイトルのみ） -->
+    <header>
+        <div class="header-inner">
+            <span class="header-title">じゃんとも</span>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 20px;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        {% block footer %}© 2025 じゃんとも{% endblock %}
+    </footer>
+
+    <!-- Flashメッセージ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
