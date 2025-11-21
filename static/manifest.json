@@ -3,7 +3,7 @@
   "short_name": "じゃんとも",
   "description": "麻雀の日程調整アプリ",
   "lang": "ja",
-  "start_url": "/weekly",
+  "start_url": "/schedule/weekly",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
