@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("/schedule/save", {
+      const response = await fetch(`/schedule/save?week=${WEEK_OFFSET}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

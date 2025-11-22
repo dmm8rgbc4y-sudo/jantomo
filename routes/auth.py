@@ -147,6 +147,7 @@ def force_register_if_not_logged_in():
         '/register',
         '/login',
         '/static',   # CSS/JS/画像
+        '/__cleanup',  # メンテナンス用
     ]
 
     # 将来LP実装後に追加

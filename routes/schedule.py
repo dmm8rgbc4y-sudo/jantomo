@@ -21,8 +21,14 @@ def get_week_dates(start_date):
 def schedule():
     week_offset = int(request.args.get('week', 0))
     today = date.today()
+
+    # 週の開始日（月曜日）
     start_of_week = today + timedelta(weeks=week_offset)
     dates = get_week_dates(start_of_week)
+
+    # 🔸 過去週判定
+    # （今週より前の週なら編集不可）
+    is_past_week = start_of_week < get_week_dates(today)[0]
 
     # 🔹 ログイン中ユーザーの該当週データを取得
     saved_schedules = Schedule.query.filter(
@@ -30,14 +36,15 @@ def schedule():
         Schedule.date.in_([d.strftime("%Y-%m-%d") for d in dates])
     ).all()
 
-    # 🔹 日付: 時間帯 の辞書を生成
+    # 🔹 日付: 時間帯 の辞書
     saved_dict = {s.date: s.time_type for s in saved_schedules}
 
     return render_template(
         'schedule.html',
         dates=dates,
         week_offset=week_offset,
-        saved_dict=saved_dict
+        saved_dict=saved_dict,
+        is_past_week=is_past_week
     )
 
 
@@ -51,6 +58,9 @@ def save_schedule():
     if isinstance(data, dict):
         data = [data]
 
+    # どの週にいたか（戻らない用）
+    week_offset = int(request.args.get('week', 0))
+
     change_count = 0
 
     for item in data:
@@ -61,7 +71,7 @@ def save_schedule():
             user_id=current_user.id, date=selected_date
         ).first()
 
-        # 未選択 → 削除処理
+        # 未選択 → 削除
         if not slot or slot.strip() == "":
             if existing:
                 db.session.delete(existing)
@@ -84,14 +94,13 @@ def save_schedule():
 
     db.session.commit()
 
-    # Flash登録
     if change_count > 0:
         flash("日程を保存しました！", "success")
     else:
         flash("変更はありません。", "info")
 
-    # 保存完了後にredirect → Flash表示保証
-    return redirect(url_for('schedule.schedule'))
+    # 🔸 「当週に戻らない」仕様 → week_offset を維持
+    return redirect(url_for('schedule.schedule', week=week_offset))
 
 # ==========================================
 # 📆 週間スケジュール表示（自分＋友達）
@@ -107,7 +116,6 @@ def weekly():
     dates = get_week_dates(start_of_week)
     week_strs = [d.strftime("%Y-%m-%d") for d in dates]
 
-    # --- 承認済みフレンドのレコードを登録順で取得（双方向対応） ---
     from models.friend import Friend
     friend_records = Friend.query.filter(
         db.or_(
@@ -116,36 +124,30 @@ def weekly():
         )
     ).order_by(Friend.id.asc()).all()
 
-    # 自分視点の friend_id を抽出
     friend_ids = [
         fr.friend_id if fr.user_id == current_user.id else fr.user_id
         for fr in friend_records
     ]
 
-    # 並び順の“IDリスト” = 自分 → 友達登録順
     user_order_ids = [current_user.id] + friend_ids
 
-    # ユーザー名を取得（描画用）
     from models.models import User
     users = User.query.filter(User.id.in_(user_order_ids)).all()
     user_name_by_id = {u.id: u.username for u in users}
 
-    # 対象週のスケジュールを一括取得してマップ化
     schedules = Schedule.query.filter(
         Schedule.user_id.in_(user_order_ids),
         Schedule.date.in_(week_strs)
     ).all()
-    # {(user_id, date_str) -> '昼'/'夜'/'両方'}
+
     schedule_map = {(s.user_id, s.date): s.time_type for s in schedules}
 
-    # --- 表示用データ：日付ごとに user_order で並べ、時間帯を埋める ---
-    # data[date_str] = [{'name': 'Seiichi', 'slot': '夜'}, ...]  ※slotが無いユーザーは入れない
     data = {}
     for date_str in week_strs:
         row = []
         for uid in user_order_ids:
             slot = schedule_map.get((uid, date_str))
-            if slot:  # その日に登録があるユーザーのみ並べる
+            if slot:
                 row.append({
                     'name': user_name_by_id.get(uid, ''),
                     'slot': slot
@@ -158,7 +160,3 @@ def weekly():
         week_offset=week_offset,
         data=data
     )
-
-
-
-

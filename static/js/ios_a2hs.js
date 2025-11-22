@@ -1,5 +1,5 @@
 // ===========================================
-// 📱 iPhone専用「ホーム画面に追加」案内バナー
+// 📱 iPhone専用「ホーム画面に追加」案内バナー（改良版）
 // ===========================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,7 +10,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // -------------------------
   // ▼ iPhone / iPad / iPod 判定
   // -------------------------
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const ua = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+
+  // -------------------------
+  // ▼ LINE / Instagram / Facebookのインアプリブラウザ判定
+  // -------------------------
+  const isInAppBrowser =
+    ua.includes("line") ||
+    ua.includes("instagram") ||
+    ua.includes("fbav") || ua.includes("fban");
 
   // -------------------------
   // ▼ PWAで起動中か？
@@ -26,11 +35,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (localStorage.getItem("iosA2HS_shown")) return;
 
   // -------------------------
-  // ▼ iOS かつ PWAではない状態のみ
+  // ▼ iOS かつ PWAではない状態のみ検討
   // -------------------------
   if (isIOS && !isInStandalone) {
+
     // weeklyページのみ表示
     if (window.location.pathname.includes("/weekly")) {
+
+      // ★ インアプリブラウザの場合は文言を差し替え
+      if (isInAppBrowser) {
+        banner.querySelector("p").innerHTML =
+          `LINE等のアプリ内ブラウザでは<br>
+          <b>ホーム画面に追加</b>できません。<br>
+           <b>Safari または Chrome</b> で開いてご利用ください。`;
+      }
+
       banner.classList.remove("hidden");
     }
   }

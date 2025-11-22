@@ -1,5 +1,5 @@
 # --- ライブラリのインポート ---
-from flask import Flask, redirect, url_for, send_from_directory
+from flask import Flask, app, redirect, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
@@ -33,12 +33,14 @@ def create_app():
     from models.friend import Friend
     from models.friend_request import FriendRequest
     from routes import auth, schedule, profile, friend
+    import maintenance
 
     # --- Blueprint登録 ---
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(schedule.schedule_bp)
     app.register_blueprint(profile.profile_bp)
     app.register_blueprint(friend.friend_bp)
+    app.register_blueprint(maintenance.maintenance_bp)
 
     # --- Flask-Loginのユーザーローダー登録 ---
     @login_manager.user_loader
@@ -58,6 +60,11 @@ def create_app():
     def service_worker():
         """Service Workerをルートパスで返す"""
         return send_from_directory('static/js', 'sw.js')
+    
+    print("=== Registered Routes ===")
+    for r in app.url_map.iter_rules():
+        print(r, "→", r.endpoint)
+    print("=========================")
 
     return app
 
