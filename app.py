@@ -48,6 +48,13 @@ def create_app():
     # ★★★★★ LP Blueprintを登録 ★★★★★
     app.register_blueprint(main_bp)
 
+    # --- Flask-Loginの未認証アクセス時の挙動（重要） ---
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        # login_required による 401 を LP へリダイレクトする
+        return redirect(url_for('main.landing'))
+
+
     # --- Flask-Loginのユーザーローダー登録 ---
     @login_manager.user_loader
     def load_user(user_id):

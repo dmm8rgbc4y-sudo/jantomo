@@ -133,7 +133,7 @@ def auto_login():
         return resp
 
 
-# --- 未ログインなら強制 /register ---
+# --- 未ログインなら LP（/landing）へ強制 ---
 @auth_bp.before_app_request
 def force_register_if_not_logged_in():
     # すでにログイン済みならOK
@@ -147,20 +147,17 @@ def force_register_if_not_logged_in():
         '/',
         '/register',
         '/login',
-        '/static',   # CSS/JS/画像
-        '/__cleanup',  # メンテナンス用
-        '/landing',    # ランディングページ
+        '/static',      # CSS/JS/画像
+        '/__cleanup',   # メンテナンス用
+        '/landing',     # ランディングページ
     ]
-
-    # 将来LP実装後に追加
-    # allowed_paths.append('/landing')
 
     # 許可パスならそのまま
     if any(path.startswith(p) for p in allowed_paths):
         return
 
-    # それ以外 → /register に強制
-    return redirect(url_for('auth.register'))
+    # それ以外 → LP に強制
+    return redirect(url_for('main.landing'))
 
 
 # --- ログアウト ---
