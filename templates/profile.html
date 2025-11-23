@@ -13,4 +13,12 @@
 <form action="{{ url_for('auth.logout') }}" method="get">
   <button type="submit">ログアウト</button>
 </form>
+
+<!-- じゃんとも風のお問い合わせカード -->
+<div class="contact-card-wrapper">
+    <a href="{{ url_for('main.landing') }}#contact" class="contact-card">
+        お問い合わせはこちら
+    </a>
+</div>
+
 {% endblock %}

@@ -35,12 +35,18 @@ def create_app():
     from routes import auth, schedule, profile, friend
     import maintenance
 
+    # ★★★★★ LP用ルートを追加 ★★★★★
+    from routes.main import main_bp
+
     # --- Blueprint登録 ---
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(schedule.schedule_bp)
     app.register_blueprint(profile.profile_bp)
     app.register_blueprint(friend.friend_bp)
     app.register_blueprint(maintenance.maintenance_bp)
+
+    # ★★★★★ LP Blueprintを登録 ★★★★★
+    app.register_blueprint(main_bp)
 
     # --- Flask-Loginのユーザーローダー登録 ---
     @login_manager.user_loader
@@ -51,9 +57,12 @@ def create_app():
     # --- トップページ（ログイン状態で遷移先を振り分け） ---
     @app.route('/')
     def index():
+        # ① ログイン済み → 週間画面へ
         if current_user.is_authenticated:
             return redirect(url_for('schedule.weekly'))
-        return redirect(url_for('auth.register'))
+
+        # ② 未ログイン → LP（landing）へ
+        return redirect(url_for('main.landing'))
 
     # --- Service Workerをルートパスで配信 ---
     @app.route('/sw.js')

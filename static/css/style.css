@@ -1069,4 +1069,218 @@ header {
   display: none;
 }
 
+/* =====================================
+   🌿 LP（Landing Page）専用スタイル
+   2025-11-21
+===================================== */
 
+/* --- ヒーローセクション --- */
+.hero {
+    text-align: center;
+    padding: 48px 20px 40px;
+    background: #f9f9f9;
+}
+
+.hero .logo {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--main-color);
+    margin-bottom: 12px;
+}
+
+.hero .catch {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.hero .sub {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* CTA（共通） */
+.cta-main {
+    display: inline-block;
+    background: var(--main-color);
+    color: #fff !important;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: 8px;
+}
+
+.cta-main:hover {
+    opacity: 0.9;
+    text-decoration: none;
+}
+
+/* --- 特徴セクション --- */
+.features {
+    padding: 40px 20px;
+    background: #ffffff;
+}
+
+.feature {
+    margin-bottom: 28px;
+}
+
+.feature h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: var(--main-color);
+}
+
+.feature p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* --- 再CTA --- */
+.cta-second {
+    text-align: center;
+    padding: 20px 0 36px;
+}
+
+/* --- お問い合わせセクション --- */
+.contact-section {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff;
+    margin-top: 20px;
+}
+
+.contact-section h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: var(--main-color);
+}
+
+.contact-section p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+.contact-btn {
+    margin-top: 8px;
+}
+
+/* --- フッター（LP専用。既存 footer と衝突しないよう少し上書き） --- */
+body.landing footer {
+    background: none;
+    padding: 20px 0;
+    color: #555;
+    font-size: 13px;
+}
+
+/* LP モック画像エリア（2枚〜3枚の画像を縦に並べる） */
+.mock-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 20px 0 40px;
+}
+
+/* 画像共通（既存 .mock を上書きせずそのまま使う） */
+.mock {
+    width: 280px;
+    max-width: 85%;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ============================
+   🌿 LP修正差分（2025-11-21）
+============================ */
+
+/* ① ヒーロー画像との余白追加 */
+.hero .mock-container {
+    margin-top: 24px;
+}
+
+/* ② LP全体の背景を薄い緑に */
+body.landing {
+    background-color: #e8f5ef; /* 明るいミントグリーン */
+}
+
+/* ③ 画像＋説明文のカードレイアウト */
+.mock-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 20px 16px 40px;
+}
+
+.mock-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px 16px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    max-width: 340px;
+    width: 90%;
+    text-align: center;
+}
+
+.mock-card h4 {
+    margin: 14px 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--main-color);
+}
+
+.mock-card p {
+    font-size: 14px;
+    color: #444;
+    margin: 0;
+}
+
+/* ④ LP専用フッター（sticky無効化 & 背景色調整） */
+body.landing footer {
+    position: static !important;
+    background: #e8f5ef !important;
+    padding: 28px 0 !important;
+    margin-top: 40px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* ===============================
+   プロフィール：お問い合わせカード
+   2025-11
+================================ */
+.contact-card-wrapper {
+    text-align: center;
+    margin-top: 32px;
+    margin-bottom: 16px;
+}
+
+.contact-card {
+    display: block;
+    width: 260px;
+    margin: 0 auto;
+    padding: 14px 0;
+    background: var(--accent-color); /* 抹茶アクセントカラー */
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.contact-card:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.contact-card:active {
+    transform: translateY(0);
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>じゃんとも - 麻雀の日程調整アプリ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="landing">
+
+    <!-- ===== ヒーローセクション ===== -->
+    <section class="hero">
+        <h1 class="logo">じゃんとも</h1>
+        <p class="catch">麻雀の日程調整、LINEよりカンタン。</p>
+        <p class="sub">名前だけで登録、すぐ予定を共有できます。</p>
+
+        <a href="{{ url_for('auth.register') }}" class="cta-main">今すぐ使う</a>
+
+        <!-- ▼ モック画像：週間カレンダー -->
+        <div class="mock-container">
+            <img src="{{ url_for('static', filename='images/calendar.jpeg') }}"
+                 class="mock"
+                 alt="週間カレンダー画面">
+        </div>
+    </section>
+
+
+    <!-- ===== 特徴セクション ===== -->
+    <section class="features">
+
+        <div class="feature">
+            <h3>名前だけですぐ始められる</h3>
+            <p>メールアドレス不要、表示名だけで登録できます。</p>
+        </div>
+
+        <div class="feature">
+            <h3>ひと目で分かる日程一覧</h3>
+            <p>昼・夜・両方を色で表示し、友達の予定が一目で分かります。</p>
+        </div>
+
+        <div class="feature">
+            <h3>友達とつながる麻雀専用ツール</h3>
+            <p>友達申請 → 承認でつながります。</p>
+        </div>
+
+    </section>
+
+
+    <!-- ===== 追加モック画像（3枚セット） ===== -->
+    <section class="mock-list">
+
+        <div class="mock-card">
+            <img src="{{ url_for('static', filename='images/calendar.jpeg') }}" class="mock">
+            <h4>📅 週間カレンダー</h4>
+            <p>友達全員の予定が一目でわかる、じゃんともの中心機能です。</p>
+        </div>
+
+        <div class="mock-card">
+            <img src="{{ url_for('static', filename='images/schedule.jpeg') }}" class="mock">
+            <h4>📝 日程入力</h4>
+            <p>昼・夜・両方を直感的に選べる、簡単入力画面。</p>
+        </div>
+
+        <div class="mock-card">
+            <img src="{{ url_for('static', filename='images/friends.jpeg') }}" class="mock">
+            <h4>👥 友達一覧</h4>
+            <p>友達を追加したり、申請を受け取れる一覧ページ。</p>
+        </div>
+
+    </section>
+
+
+    <!-- ===== 再CTA ===== -->
+    <section class="cta-second">
+        <a href="{{ url_for('auth.register') }}" class="cta-main">今すぐ使う</a>
+    </section>
+
+
+    <!-- ===== お問い合わせフォーム ===== -->
+    <section class="contact-section" id="contact">
+        <h2>お問い合わせ</h2>
+        <p>不具合の報告・ご意見・ご感想など、なんでもお送りください。</p>
+
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScJYq-PXycjW8_RqrwYddpWSfu3fB1LDH3ozMsCBS5X68GzVA/viewform?usp=header"
+           target="_blank"
+           class="cta-main contact-btn">
+           問い合わせフォームを開く
+        </a>
+    </section>
+
+
+    <!-- ===== フッター ===== -->
+    <footer>
+        © 2025 じゃんとも
+    </footer>
+
+</body>
+</html>

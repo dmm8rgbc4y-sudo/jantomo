@@ -144,10 +144,12 @@ def force_register_if_not_logged_in():
 
     # 未ログインでもアクセスOKなパス
     allowed_paths = [
+        '/',
         '/register',
         '/login',
         '/static',   # CSS/JS/画像
         '/__cleanup',  # メンテナンス用
+        '/landing',    # ランディングページ
     ]
 
     # 将来LP実装後に追加
