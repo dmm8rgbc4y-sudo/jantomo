@@ -1,8 +1,8 @@
-"""init with ondelete cascade
+"""init
 
-Revision ID: 7763b5039fde
+Revision ID: 16fe54434dcc
 Revises: 
-Create Date: 2025-11-12 12:19:40.759479
+Create Date: 2025-11-24 10:21:01.666687
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7763b5039fde'
+revision = '16fe54434dcc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,8 @@ def upgrade():
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=64), nullable=False),
-    sa.Column('device_token', sa.String(length=64), nullable=False),
+    sa.Column('pin', sa.String(length=6), nullable=False),
+    sa.Column('device_token', sa.String(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('device_token'),

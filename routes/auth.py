@@ -1,4 +1,4 @@
-# routes/auth.py（本番用・デバイス別トークン方式）
+# routes/auth.py（PIN認証 + デバイス別トークン方式）
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, current_app
 from flask_login import login_user, logout_user, login_required, current_user
@@ -14,6 +14,9 @@ COOKIE_NAME = "device_token"
 TOKEN_TTL_DAYS = 30
 
 
+# ======================================================
+# 共通：デバイストークン発行
+# ======================================================
 def _issue_device_token(user_id: int) -> str:
     token = secrets.token_hex(32)
     now = datetime.now(timezone.utc)
@@ -46,71 +49,34 @@ def _set_login_cookie(response, token: str):
     return response
 
 
-# --- 新規登録 ---
-@auth_bp.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
+# ======================================================
+# 共通：PINバリデーション関数
+# ======================================================
+def _validate_pin(pin: str, redirect_target: str):
+    """
+    ・数字のみ
+    ・4〜6桁
+    をチェックして、問題があれば flash + redirect を返す。
+    問題なければ None を返す。
+    """
+    if not pin.isdigit():
+        flash('PIN は数字で入力してください。', 'error')
+        return redirect(url_for(redirect_target))
 
-        if not username:
-            flash('ユーザー名を入力してください。', 'error')
-            return redirect(url_for('auth.register'))
+    if len(pin) < 4:
+        flash('PIN は4桁以上で入力してください。', 'error')
+        return redirect(url_for(redirect_target))
 
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            flash('このユーザー名は既に登録されています。', 'error')
-            return redirect(url_for('auth.register'))
+    if len(pin) > 6:
+        flash('PIN は6桁以下で入力してください。', 'error')
+        return redirect(url_for(redirect_target))
 
-        new_user = User(username=username, device_token=secrets.token_hex(16))
-        db.session.add(new_user)
-        db.session.commit()
-
-        login_user(new_user)
-
-        token = _issue_device_token(new_user.id)
-        resp = make_response(redirect(url_for('schedule.weekly')))
-        _set_login_cookie(resp, token)
-
-        return resp
-
-    return render_template('register.html', mode='register')
+    return None  # 正常
 
 
-# --- ログイン ---
-@auth_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-
-        if not username:
-            flash('ユーザー名を入力してください。', 'error')
-            return redirect(url_for('auth.login'))
-
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            flash('このユーザーは登録されていません。', 'error')
-            return redirect(url_for('auth.login'))
-
-        login_user(user)
-
-        Device.query.filter_by(user_id=user.id, is_revoked=False).update({'is_revoked': True})
-        db.session.commit()
-
-        token = secrets.token_hex(32)
-        expires_at = datetime.utcnow() + timedelta(days=TOKEN_TTL_DAYS)
-        new_device = Device(user_id=user.id, token=token, expires_at=expires_at, is_revoked=False)
-        db.session.add(new_device)
-        db.session.commit()
-
-        resp = make_response(redirect(url_for('schedule.weekly')))
-        _set_login_cookie(resp, token)
-
-        return resp
-
-    return render_template('register.html', mode='login')
-
-
-# --- 自動ログイン ---
+# ======================================================
+# 自動ログイン（force_register の前に実行）
+# ======================================================
 @auth_bp.before_app_request
 def auto_login():
     if current_user.is_authenticated:
@@ -124,43 +90,129 @@ def auto_login():
     if not device:
         return
 
-    now = datetime.utcnow()
-    if device.expires_at and device.expires_at > now:
-        login_user(device.user)
-    else:
-        resp = make_response(redirect(url_for('auth.register')))
+    # naive datetime に tz を付与
+    expires_at = device.expires_at
+    if expires_at and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(timezone.utc)
+
+    # 有効期限チェック
+    if expires_at and expires_at <= now:
+        resp = make_response(redirect(url_for('auth.login')))
         resp.delete_cookie(COOKIE_NAME)
         return resp
 
+    # 自動ログイン成功
+    login_user(device.user)
 
-# --- 未ログインなら LP（/landing）へ強制 ---
+
+# ======================================================
+# 未ログイン時は LP /landing へ誘導
+# ======================================================
 @auth_bp.before_app_request
 def force_register_if_not_logged_in():
-    # すでにログイン済みならOK
     if current_user.is_authenticated:
         return
 
     path = request.path
 
-    # 未ログインでもアクセスOKなパス
     allowed_paths = [
-        '/',
         '/register',
         '/login',
-        '/static',      # CSS/JS/画像
-        '/__cleanup',   # メンテナンス用
-        '/landing',     # ランディングページ
+        '/static',
+        '/__cleanup',
+        '/landing',
     ]
 
-    # 許可パスならそのまま
     if any(path.startswith(p) for p in allowed_paths):
         return
 
-    # それ以外 → LP に強制
     return redirect(url_for('main.landing'))
 
 
-# --- ログアウト ---
+# ======================================================
+# 新規登録（名前 + PIN）
+# ======================================================
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        pin = request.form.get('pin')
+
+        if not username or not pin:
+            flash('ユーザー名と PIN を入力してください。', 'error')
+            return redirect(url_for('auth.register'))
+
+        # PINバリデーション（共通化）
+        res = _validate_pin(pin, 'auth.register')
+        if res:
+            return res
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('このユーザー名は既に登録されています。', 'error')
+            return redirect(url_for('auth.register'))
+
+        new_user = User(username=username, pin=pin, device_token=None)
+        db.session.add(new_user)
+        db.session.commit()
+
+        login_user(new_user)
+
+        token = _issue_device_token(new_user.id)
+        resp = make_response(redirect(url_for('schedule.weekly')))
+        _set_login_cookie(resp, token)
+        return resp
+
+    return render_template('register.html', mode='register')
+
+
+# ======================================================
+# ログイン（名前 + PIN）
+# ======================================================
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        pin = request.form.get('pin')
+
+        if not username or not pin:
+            flash('ユーザー名と PIN を入力してください。', 'error')
+            return redirect(url_for('auth.login'))
+
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            flash('ユーザーが存在しません。', 'error')
+            return redirect(url_for('auth.login'))
+
+        # PINバリデーション（共通）
+        res = _validate_pin(pin, 'auth.login')
+        if res:
+            return res
+
+        if user.pin != pin:
+            flash('PIN が正しくありません。', 'error')
+            return redirect(url_for('auth.login'))
+
+        login_user(user)
+
+        # 既存の device_token の revoke
+        Device.query.filter_by(user_id=user.id, is_revoked=False).update({'is_revoked': True})
+        db.session.commit()
+
+        token = _issue_device_token(user.id)
+
+        resp = make_response(redirect(url_for('schedule.weekly')))
+        _set_login_cookie(resp, token)
+        return resp
+
+    return render_template('register.html', mode='login')
+
+
+# ======================================================
+# ログアウト
+# ======================================================
 @auth_bp.route('/logout')
 @login_required
 def logout():
@@ -173,9 +225,8 @@ def logout():
             db.session.commit()
 
     logout_user()
-
     flash('ログアウトしました。', 'info')
 
-    resp = make_response(redirect(url_for('auth.register')))
+    resp = make_response(redirect(url_for('auth.login')))
     resp.delete_cookie(COOKIE_NAME)
     return resp

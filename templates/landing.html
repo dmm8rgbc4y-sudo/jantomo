@@ -14,7 +14,9 @@
     <section class="hero">
         <h1 class="logo">じゃんとも</h1>
         <p class="catch">麻雀の日程調整、LINEよりカンタン。</p>
-        <p class="sub">名前だけで登録、すぐ予定を共有できます。</p>
+
+        <!-- ★ PIN対応の新しい文言 -->
+        <p class="sub">名前 + PIN でサクッと登録。すぐ予定を共有できます。</p>
 
         <a href="{{ url_for('auth.register') }}" class="cta-main">今すぐ使う</a>
 
@@ -31,8 +33,11 @@
     <section class="features">
 
         <div class="feature">
-            <h3>名前だけですぐ始められる</h3>
-            <p>メールアドレス不要、表示名だけで登録できます。</p>
+
+            <!-- ★ ここを PIN 仕様に -->
+            <h3>名前 + PIN ですぐ始められる</h3>
+            <p>メール不要。名前と4〜6桁のPINだけで登録できます。</p>
+
         </div>
 
         <div class="feature">
@@ -42,7 +47,7 @@
 
         <div class="feature">
             <h3>友達とつながる麻雀専用ツール</h3>
-            <p>友達申請 → 承認でつながります。</p>
+            <p>友達申請 → 承認でつながり、予定共有がスムーズに。</p>
         </div>
 
     </section>

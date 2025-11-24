@@ -5,8 +5,16 @@ from app import db  # app.pyからdbをインポート
 # --- Userモデル ---
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+
+    # 🔹 名前（ユニーク）
     username = db.Column(db.String(64), unique=True, nullable=False)
-    device_token = db.Column(db.String(64), unique=True, nullable=False)
+
+    # 🔹 PIN（4〜6桁）
+    pin = db.Column(db.String(6), nullable=False)
+
+    # 🔹 デバイストークン（自動ログイン用）
+    device_token = db.Column(db.String(64), unique=True, nullable=True)
+
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     schedules = db.relationship('Schedule', backref='user', lazy=True)

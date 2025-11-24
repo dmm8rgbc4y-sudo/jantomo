@@ -12,9 +12,18 @@
   {% endif %}
 {% endwith %}
 
-<form method="POST">
+<!-- ★ ブラウザのバリデーションを無効化 -->
+<form method="POST" novalidate>
   <label>ユーザー名：</label>
   <input type="text" name="username" placeholder="例：Taro" required>
+
+  <label>PIN（4〜6桁）：</label>
+  <input type="password"
+         name="pin"
+         placeholder="例：1234"
+         inputmode="numeric"
+         required>
+
   <button type="submit">
     {% if mode == 'login' %}ログイン{% else %}登録して始める{% endif %}
   </button>
