@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from app import db
 from models import Schedule
 from models.friend import Friend   # 友達機能利用予定
+import json
 
 schedule_bp = Blueprint('schedule', __name__)
 
@@ -49,58 +50,76 @@ def schedule():
 
 
 # ==========================================
-# 💾 日程保存API（Flash付き）
+# 💾 日程保存API（Flash付き / 通常フォームPOST対応）
 # ==========================================
 @schedule_bp.route('/schedule/save', methods=['POST'])
 @login_required
 def save_schedule():
-    data = request.get_json()
-    if isinstance(data, dict):
-        data = [data]
 
-    # どの週にいたか（戻らない用）
+    # ------------------------------
+    # 📌 JS が form で渡す hidden input
+    #    <input name="payload" value="JSON文字列">
+    # ------------------------------
+    payload_raw = request.form.get("payload")
+
+    if not payload_raw:
+        flash("保存データが受け取れませんでした。", "error")
+        return redirect(url_for('schedule.schedule'))
+
+    try:
+        data = json.loads(payload_raw)
+    except Exception:
+        flash("データ解析でエラーが発生しました。", "error")
+        return redirect(url_for('schedule.schedule'))
+
+    # どの週から遷移してきたか
     week_offset = int(request.args.get('week', 0))
 
     change_count = 0
 
     for item in data:
-        selected_date = item['date']
-        slot = item.get('slot')
+        selected_date = item["date"]
+        slot = item.get("slot", "").strip()
 
         existing = Schedule.query.filter_by(
             user_id=current_user.id, date=selected_date
         ).first()
 
-        # 未選択 → 削除
-        if not slot or slot.strip() == "":
+        # --------------------------
+        # ❌ 未選択 → 削除処理
+        # --------------------------
+        if slot == "":
             if existing:
                 db.session.delete(existing)
                 change_count += 1
             continue
 
-        # 更新 or 新規
+        # --------------------------
+        # ✏ 更新 or 新規作成
+        # --------------------------
         if existing:
             if existing.time_type != slot:
                 existing.time_type = slot
                 change_count += 1
         else:
-            new_entry = Schedule(
+            new_row = Schedule(
                 user_id=current_user.id,
                 date=selected_date,
                 time_type=slot
             )
-            db.session.add(new_entry)
+            db.session.add(new_row)
             change_count += 1
 
     db.session.commit()
 
+    # Flash（ブラウザ通常遷移前提 → 100%表示される）
     if change_count > 0:
-        flash("日程を保存しました！", "success")
+        flash("変更を保存しました！", "success")
     else:
         flash("変更はありません。", "info")
 
-    # 🔸 「当週に戻らない」仕様 → week_offset を維持
     return redirect(url_for('schedule.schedule', week=week_offset))
+
 
 # ==========================================
 # 📆 週間スケジュール表示（自分＋友達）

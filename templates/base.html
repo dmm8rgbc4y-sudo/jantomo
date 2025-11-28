@@ -8,21 +8,23 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
-    <!-- manifest.json & PWA meta -->
+    <!-- manifest & PWA -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#009870">
 
-    <!-- Service Worker登録スクリプト -->
+    <!-- OGP -->
+    <meta property="og:title" content="じゃんとも – 麻雀の日程調整アプリ">
+    <meta property="og:description" content="麻雀仲間で日程調整を最速で。名前＋PINですぐ使える。">
+    <meta property="og:image" content="{{ url_for('static', filename='images/ogp.png', _external=True) }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Service Worker -->
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function() {
           navigator.serviceWorker.register("{{ url_for('static', filename='js/sw.js') }}")
-            .then(function(reg) {
-              console.log("Service Worker registered:", reg.scope);
-            })
-            .catch(function(err) {
-              console.error("Service Worker registration failed:", err);
-            });
+            .catch(err => console.error("SW registration failed:", err));
         });
       }
     </script>
@@ -32,62 +34,44 @@
 
 <body>
 
-    <!-- ▼▼ iPhone専用ホーム画面追加バナー（A2HS） ▼▼ -->
+    <!-- iOS A2HS -->
     <div id="ios-a2hs-banner" class="ios-a2hs-banner hidden">
       <p>
         じゃんともをもっと便利に！<br>
-        <b>① 共有ボタン</b> をタップし、<br>
-        <b>②「ホーム画面に追加」</b> を選んでください。
+        <b>① 共有ボタン</b> → <b>② ホーム画面に追加</b>
       </p>
       <button id="ios-a2hs-close">閉じる</button>
     </div>
-    <!-- ▲▲ iPhone専用バナー ▲▲ -->
 
-
-    <!-- ヘッダー -->
+    <!-- Header -->
     <header>
-        <div class="header-inner">
-            <span class="header-title">じゃんとも</span>
-            <!-- プロフィールアイコン -->
-            <a href="{{ url_for('profile.profile') }}" class="profile-icon" title="プロフィール">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" viewBox="0 0 24 24">
-                    <path d="M12 12c2.67 0 8 1.34 8 4v3H4v-3c0-2.66 5.33-4 8-4zm0-2c-1.66 0-3-1.34-3-3s1.34-3 
-                      3-3 3 1.34 3 3-1.34 3-3 3z"/>
-                </svg>
-            </a>
-        </div>
+      <div class="header-inner">
+        <span class="header-title">じゃんとも</span>
+        <a href="{{ url_for('profile.profile') }}" class="profile-icon" title="プロフィール">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="white" viewBox="0 0 24 24">
+            <path d="M12 12c2.67 0 8 1.34 8 4v3H4v-3c0-2.66 5.33-4 8-4zm0-2c-1.66 0-3-1.34-3-3s1.34-3 
+              3-3 3 1.34 3 3-1.34 3-3 3z"/>
+          </svg>
+        </a>
+      </div>
     </header>
 
-    <!-- 📱（Android向け）旧PWA案内バナーは削除済み -->
-    <div id="pwa-banner" class="pwa-banner hidden"></div>
-
-    <!-- ナビゲーションバー -->
+    <!-- Nav -->
     <nav class="nav-tabs">
         <a href="{{ url_for('schedule.schedule') }}"
-        class="nav-tab {% if request.endpoint == 'schedule.schedule' %}active{% endif %}">
-        日程入力
-        </a>
-
+           class="nav-tab {% if request.endpoint == 'schedule.schedule' %}active{% endif %}">日程入力</a>
         <a href="{{ url_for('schedule.weekly') }}"
-        class="nav-tab {% if request.endpoint == 'schedule.weekly' %}active{% endif %}">
-        週間
-        </a>
-
+           class="nav-tab {% if request.endpoint == 'schedule.weekly' %}active{% endif %}">週間</a>
         <a href="{{ url_for('friend.friend_list') }}"
-        class="nav-tab {% if request.endpoint.startswith('friend') %}active{% endif %}">
-        友達
-        </a>
+           class="nav-tab {% if request.endpoint.startswith('friend') %}active{% endif %}">友達</a>
     </nav>
 
+    <!-- Main -->
     <main class="container">
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        {% block footer %}© 2025 じゃんとも{% endblock %}
-    </footer>
-
-    <!-- 共通Flashメッセージ表示領域 -->
+    <!-- Flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div id="flash-container">
@@ -98,10 +82,39 @@
       {% endif %}
     {% endwith %}
 
-    <!-- ▼ iPhone専用A2HSスクリプト -->
+    <!-- Footer -->
+    <footer>
+        {% block footer %}© 2025 じゃんとも{% endblock %}
+    </footer>
+
+    <!-- iOS A2HS -->
     <script src="{{ url_for('static', filename='js/ios_a2hs.js') }}"></script>
+
+    <!-- ▼ schedule.js（scheduleページ限定） -->
+    {% if request.endpoint == 'schedule.schedule' %}
+      <script data-week="{{ week_offset | tojson }}"></script>
+      <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+    {% endif %}
     <!-- ▲ -->
 
     {% block scripts %}{% endblock %}
+
+    <!-- ▼ Flash 自動フェードアウト（成功Flashにも対応） -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const flashes = document.querySelectorAll("#flash-container .flash-message");
+
+        flashes.forEach((flash) => {
+            setTimeout(() => {
+                flash.style.transition = "opacity 0.6s ease";
+                flash.style.opacity = "0";
+            }, 2000);
+
+            setTimeout(() => flash.remove(), 2600);
+        });
+    });
+    </script>
+    <!-- ▲ Flash 自動フェードアウト -->
+
 </body>
 </html>

@@ -7,8 +7,10 @@ from app import db
 from models.models import User
 from models.device import Device
 import secrets
+from flask_bcrypt import Bcrypt
 
 auth_bp = Blueprint('auth', __name__)
+bcrypt = Bcrypt()
 
 COOKIE_NAME = "device_token"
 TOKEN_TTL_DAYS = 30
@@ -50,15 +52,9 @@ def _set_login_cookie(response, token: str):
 
 
 # ======================================================
-# 共通：PINバリデーション関数
+# 共通：PIN バリデーション（4〜6桁）
 # ======================================================
 def _validate_pin(pin: str, redirect_target: str):
-    """
-    ・数字のみ
-    ・4〜6桁
-    をチェックして、問題があれば flash + redirect を返す。
-    問題なければ None を返す。
-    """
     if not pin.isdigit():
         flash('PIN は数字で入力してください。', 'error')
         return redirect(url_for(redirect_target))
@@ -71,11 +67,11 @@ def _validate_pin(pin: str, redirect_target: str):
         flash('PIN は6桁以下で入力してください。', 'error')
         return redirect(url_for(redirect_target))
 
-    return None  # 正常
+    return None
 
 
 # ======================================================
-# 自動ログイン（force_register の前に実行）
+# 自動ログイン
 # ======================================================
 @auth_bp.before_app_request
 def auto_login():
@@ -90,25 +86,22 @@ def auto_login():
     if not device:
         return
 
-    # naive datetime に tz を付与
     expires_at = device.expires_at
     if expires_at and expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
 
     now = datetime.now(timezone.utc)
 
-    # 有効期限チェック
     if expires_at and expires_at <= now:
         resp = make_response(redirect(url_for('auth.login')))
         resp.delete_cookie(COOKIE_NAME)
         return resp
 
-    # 自動ログイン成功
     login_user(device.user)
 
 
 # ======================================================
-# 未ログイン時は LP /landing へ誘導
+# LP誘導（未ログイン）
 # ======================================================
 @auth_bp.before_app_request
 def force_register_if_not_logged_in():
@@ -132,7 +125,7 @@ def force_register_if_not_logged_in():
 
 
 # ======================================================
-# 新規登録（名前 + PIN）
+# 新規登録
 # ======================================================
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -144,7 +137,7 @@ def register():
             flash('ユーザー名と PIN を入力してください。', 'error')
             return redirect(url_for('auth.register'))
 
-        # PINバリデーション（共通化）
+        # PIN のバリデーション
         res = _validate_pin(pin, 'auth.register')
         if res:
             return res
@@ -154,7 +147,10 @@ def register():
             flash('このユーザー名は既に登録されています。', 'error')
             return redirect(url_for('auth.register'))
 
-        new_user = User(username=username, pin=pin, device_token=None)
+        # ★ PIN をハッシュ化して保存
+        hashed_pin = bcrypt.generate_password_hash(pin).decode('utf-8')
+
+        new_user = User(username=username, pin=hashed_pin, device_token=None)
         db.session.add(new_user)
         db.session.commit()
 
@@ -169,7 +165,7 @@ def register():
 
 
 # ======================================================
-# ログイン（名前 + PIN）
+# ログイン
 # ======================================================
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -186,23 +182,22 @@ def login():
             flash('ユーザーが存在しません。', 'error')
             return redirect(url_for('auth.login'))
 
-        # PINバリデーション（共通）
+        # PIN バリデーション（形式チェックのみ）
         res = _validate_pin(pin, 'auth.login')
         if res:
             return res
 
-        if user.pin != pin:
+        # ★ ハッシュ比較
+        if not bcrypt.check_password_hash(user.pin, pin):
             flash('PIN が正しくありません。', 'error')
             return redirect(url_for('auth.login'))
 
         login_user(user)
 
-        # 既存の device_token の revoke
         Device.query.filter_by(user_id=user.id, is_revoked=False).update({'is_revoked': True})
         db.session.commit()
 
         token = _issue_device_token(user.id)
-
         resp = make_response(redirect(url_for('schedule.weekly')))
         _set_login_cookie(resp, token)
         return resp

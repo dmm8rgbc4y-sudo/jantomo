@@ -1284,3 +1284,20 @@ body.landing footer {
 .contact-card:active {
     transform: translateY(0);
 }
+/* =======================
+   FLASH 最終強制上書き
+======================= */
+#flash-container .flash-message.success {
+  background-color: #2ecc71 !important;
+  color: #ffffff !important;
+}
+
+#flash-container .flash-message.error {
+  background-color: #e74c3c !important;
+  color: #ffffff !important;
+}
+
+#flash-container .flash-message.info {
+  background-color: #3498db !important;
+  color: #ffffff !important;
+}

@@ -6,6 +6,14 @@
     <title>じゃんとも - 麻雀の日程調整アプリ</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- ▼▼ OGP（LP専用） ▼▼ -->
+    <meta property="og:title" content="じゃんとも – 麻雀の日程調整アプリ">
+    <meta property="og:description" content="麻雀仲間で日程調整を最速で。名前＋PINですぐ使える。">
+    <meta property="og:image" content="{{ url_for('static', filename='images/ogp.png', _external=True) }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- ▲▲ OGP（LP専用） ▲▲ -->
 </head>
 
 <body class="landing">
