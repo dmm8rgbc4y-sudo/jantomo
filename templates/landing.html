@@ -31,6 +31,18 @@
 
 <body class="landing">
 
+    <!-- ▼▼ LP閲覧（landing_view）イベント送信 ▼▼ -->
+    {% if GA4_ID %}
+    <script>
+        gtag('event', 'landing_view', {
+            page_location: window.location.href,
+            page_title: document.title
+        });
+    </script>
+    {% endif %}
+    <!-- ▲▲ LP閲覧（landing_view）イベント送信 ▲▲ -->
+
+
     <!-- ===== ヒーローセクション ===== -->
     <section class="hero">
         <h1 class="logo">じゃんとも</h1>
