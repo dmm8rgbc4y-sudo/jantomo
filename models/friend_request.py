@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone 
-from app import db
+from .db import db
     
 # --- FriendRequestモデル ---
 class FriendRequest(db.Model):

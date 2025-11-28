@@ -1,9 +1,9 @@
-# routes/auth.py（PIN認証 + デバイス別トークン方式）
+# routes/auth.py（PIN認証 + デバイストークン方式）
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta, timezone
-from app import db
+from models import db
 from models.models import User
 from models.device import Device
 import secrets
@@ -52,7 +52,7 @@ def _set_login_cookie(response, token: str):
 
 
 # ======================================================
-# 共通：PIN バリデーション（4〜6桁）
+# PIN バリデーション
 # ======================================================
 def _validate_pin(pin: str, redirect_target: str):
     if not pin.isdigit():
@@ -71,9 +71,8 @@ def _validate_pin(pin: str, redirect_target: str):
 
 
 # ======================================================
-# 自動ログイン
+# 自動ログイン（app.py で before_request に登録する）
 # ======================================================
-@auth_bp.before_app_request
 def auto_login():
     if current_user.is_authenticated:
         return
@@ -101,9 +100,8 @@ def auto_login():
 
 
 # ======================================================
-# LP誘導（未ログイン）
+# LP誘導（app.py で before_request に登録する）
 # ======================================================
-@auth_bp.before_app_request
 def force_register_if_not_logged_in():
     if current_user.is_authenticated:
         return

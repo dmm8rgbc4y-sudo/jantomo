@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, flash
 from flask_login import login_required, current_user
-from app import db
+from models import db
 from models.friend import Friend
 from models.models import User  # Userテーブルを参照
 

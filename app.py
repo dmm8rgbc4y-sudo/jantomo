@@ -1,82 +1,84 @@
-# --- ライブラリのインポート ---
-from flask import Flask, app, redirect, url_for, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
+# app.py
+
+from flask import Flask, redirect, url_for, send_from_directory
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 import os
 
-# --- グローバル変数の定義 ---
-db = SQLAlchemy()
+# 🔹 db を models から読み込む（正しい構成）
+from models.db import db
+
 login_manager = LoginManager()
 migrate = Migrate()
 
-# --- アプリケーションの作成 ---
+
 def create_app():
     app = Flask(__name__)
-    app.secret_key = 'secret-key'
-    
+    app.secret_key = "secret-key"
+
     # --- DB格納場所の設定 ---
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     default_db = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'jantomo.db')}"
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL', default_db
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+        "DATABASE_URL", default_db
     ).replace("postgres://", "postgresql://")
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # --- グローバル変数の初期化 ---
+    # --- 初期化 ---
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
 
-    # --- モデル・ルートをインポート ---
+    # --- モデル読み込み（db.create_all() のために必要） ---
     from models.models import User
     from models.friend import Friend
     from models.friend_request import FriendRequest
-    from routes import auth, schedule, profile, friend
-    import maintenance
+    from models.device import Device
 
-    # ★★★★★ LP用ルートを追加 ★★★★★
+    # --- Blueprint を個別 import（循環防止） ---
+    from routes.auth import auth_bp
+    from routes.schedule import schedule_bp
+    from routes.profile import profile_bp
+    from routes.friend import friend_bp
     from routes.main import main_bp
+    from maintenance import maintenance_bp
 
     # --- Blueprint登録 ---
-    app.register_blueprint(auth.auth_bp)
-    app.register_blueprint(schedule.schedule_bp)
-    app.register_blueprint(profile.profile_bp)
-    app.register_blueprint(friend.friend_bp)
-    app.register_blueprint(maintenance.maintenance_bp)
-
-    # ★★★★★ LP Blueprintを登録 ★★★★★
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(schedule_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(friend_bp)
+    app.register_blueprint(maintenance_bp)
     app.register_blueprint(main_bp)
 
-    # --- Flask-Loginの未認証アクセス時の挙動（重要） ---
+    # --- Flask-Login 未ログイン時の挙動 ---
     @login_manager.unauthorized_handler
     def unauthorized():
-        # login_required による 401 を LP へリダイレクトする
-        return redirect(url_for('main.landing'))
+        return redirect(url_for("main.landing"))
 
-
-    # --- Flask-Loginのユーザーローダー登録 ---
     @login_manager.user_loader
     def load_user(user_id):
-        """セッション内のuser_idからユーザーを復元"""
         return User.query.get(int(user_id))
 
-    # --- トップページ（ログイン状態で遷移先を振り分け） ---
-    @app.route('/')
+    # --- トップページ ---
+    @app.route("/")
     def index():
-        # ① ログイン済み → 週間画面へ
         if current_user.is_authenticated:
-            return redirect(url_for('schedule.weekly'))
+            return redirect(url_for("schedule.weekly"))
+        return redirect(url_for("main.landing"))
 
-        # ② 未ログイン → LP（landing）へ
-        return redirect(url_for('main.landing'))
-
-    # --- Service Workerをルートパスで配信 ---
-    @app.route('/sw.js')
+    # --- Service Worker ---
+    @app.route("/sw.js")
     def service_worker():
-        """Service Workerをルートパスで返す"""
-        return send_from_directory('static/js', 'sw.js')
-    
+        return send_from_directory("static/js", "sw.js")
+
+    # --- auto_login / LP誘導 ---
+    from routes.auth import auto_login, force_register_if_not_logged_in
+
+    app.before_request(auto_login)
+    app.before_request(force_register_if_not_logged_in)
+
+    # --- ルート一覧 ---
     print("=== Registered Routes ===")
     for r in app.url_map.iter_rules():
         print(r, "→", r.endpoint)
@@ -85,12 +87,8 @@ def create_app():
     return app
 
 
-# --- アプリ起動 ---
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
-
-    # 🚀 Renderデプロイ時にPostgreSQLのテーブルを自動作成
     with app.app_context():
         db.create_all()
-        
     app.run(debug=True)

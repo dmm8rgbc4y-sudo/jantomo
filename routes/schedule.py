@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from datetime import date, timedelta
 from flask_login import login_required, current_user
-from app import db
+from models import db
 from models import Schedule
 from models.friend import Friend   # 友達機能利用予定
 import json

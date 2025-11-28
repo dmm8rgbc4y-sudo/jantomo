@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from app import db
+from .db import db
 
 class Device(db.Model):
     __tablename__ = "device"

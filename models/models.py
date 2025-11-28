@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from datetime import datetime, timezone
-from app import db  # app.pyからdbをインポート
+from .db import db  # app.pyからdbをインポート
 
 # --- Userモデル ---
 class User(db.Model, UserMixin):
