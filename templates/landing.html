@@ -14,6 +14,19 @@
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <!-- ▲▲ OGP（LP専用） ▲▲ -->
+
+    <!-- ▼▼ GA4（LP用に追加） ▼▼ -->
+    {% if GA4_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA4_ID }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', '{{ GA4_ID }}');
+    </script>
+    {% endif %}
+    <!-- ▲▲ GA4（LP用） ▲▲ -->
+
 </head>
 
 <body class="landing">
@@ -41,11 +54,8 @@
     <section class="features">
 
         <div class="feature">
-
-            <!-- ★ ここを PIN 仕様に -->
             <h3>名前 + PIN ですぐ始められる</h3>
             <p>メール不要。名前と4〜6桁のPINだけで登録できます。</p>
-
         </div>
 
         <div class="feature">
