@@ -16,6 +16,9 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = "secret-key"
 
+    # --- GA4 設定 ---
+    app.config["GA4_ID"] = "G-0JVEJFNN2L"
+
     # --- DB格納場所の設定 ---
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     default_db = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'jantomo.db')}"
@@ -29,13 +32,18 @@ def create_app():
     login_manager.init_app(app)
     migrate.init_app(app, db)
 
-    # --- モデル読み込み（db.create_all() のために必要） ---
+    # --- GA4 をテンプレートへ渡す（context_processor） ---
+    @app.context_processor
+    def inject_ga4():
+        return dict(GA4_ID=app.config.get("GA4_ID"))
+
+    # --- モデル読み込み ---
     from models.models import User
     from models.friend import Friend
     from models.friend_request import FriendRequest
     from models.device import Device
 
-    # --- Blueprint を個別 import（循環防止） ---
+    # --- Blueprint ---
     from routes.auth import auth_bp
     from routes.schedule import schedule_bp
     from routes.profile import profile_bp
@@ -43,7 +51,6 @@ def create_app():
     from routes.main import main_bp
     from maintenance import maintenance_bp
 
-    # --- Blueprint登録 ---
     app.register_blueprint(auth_bp)
     app.register_blueprint(schedule_bp)
     app.register_blueprint(profile_bp)
@@ -74,11 +81,10 @@ def create_app():
 
     # --- auto_login / LP誘導 ---
     from routes.auth import auto_login, force_register_if_not_logged_in
-
     app.before_request(auto_login)
     app.before_request(force_register_if_not_logged_in)
 
-    # --- ルート一覧 ---
+    # --- Routes debug print ---
     print("=== Registered Routes ===")
     for r in app.url_map.iter_rules():
         print(r, "→", r.endpoint)

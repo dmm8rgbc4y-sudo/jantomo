@@ -30,6 +30,19 @@
     </script>
 
     {% block head %}{% endblock %}
+
+    <!-- ▼ GA4（Google Analytics） -->
+    {% if GA4_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA4_ID }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', '{{ GA4_ID }}');
+    </script>
+    {% endif %}
+    <!-- ▲ GA4 -->
+
 </head>
 
 <body>
@@ -99,7 +112,7 @@
 
     {% block scripts %}{% endblock %}
 
-    <!-- ▼ Flash 自動フェードアウト（成功Flashにも対応） -->
+    <!-- ▼ Flash 自動フェードアウト -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const flashes = document.querySelectorAll("#flash-container .flash-message");
