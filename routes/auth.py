@@ -155,11 +155,16 @@ def register():
         login_user(new_user)
 
         token = _issue_device_token(new_user.id)
-        resp = make_response(redirect(url_for('schedule.weekly')))
+
+        # ▼▼ GA4：登録完了イベントのためのフラグ付リダイレクト ▼▼
+        resp = make_response(redirect(url_for('schedule.weekly', register_complete=1)))
+        # ▲▲ ここが唯一の追加 ▲▲
+
         _set_login_cookie(resp, token)
         return resp
 
     return render_template('register.html', mode='register')
+
 
 
 # ======================================================

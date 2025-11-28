@@ -3,6 +3,18 @@
 
 {% block content %}
 
+<!-- ▼▼ GA4：週間画面閲覧イベント（毎回発火） ▼▼ -->
+<script>
+  gtag('event', 'weekly_view');
+</script>
+
+<!-- ▼▼ GA4：登録完了イベント（初回の時だけ） ▼▼ -->
+{% if request.args.get('register_complete') %}
+<script>
+  gtag('event', 'register_complete', { method: 'name_pin' });
+</script>
+{% endif %}
+
 <!-- 週ナビゲーション -->
 <div class="week-nav">
   <a href="{{ url_for('schedule.weekly', week=week_offset - 1) }}">＜ 前の週</a>
