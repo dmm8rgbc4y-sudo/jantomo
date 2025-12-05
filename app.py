@@ -5,7 +5,7 @@ from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 import os
 
-# 🔹 db を models から読み込む（正しい構成）
+# 🔹 db を models から読み込む
 from models.db import db
 
 login_manager = LoginManager()
@@ -32,7 +32,7 @@ def create_app():
     login_manager.init_app(app)
     migrate.init_app(app, db)
 
-    # --- GA4 をテンプレートへ渡す（context_processor） ---
+    # --- GA4 をテンプレートへ渡す ---
     @app.context_processor
     def inject_ga4():
         return dict(GA4_ID=app.config.get("GA4_ID"))
@@ -58,7 +58,7 @@ def create_app():
     app.register_blueprint(maintenance_bp)
     app.register_blueprint(main_bp)
 
-    # --- Flask-Login 未ログイン時の挙動 ---
+    # --- Flask-Login 未ログイン時 ---
     @login_manager.unauthorized_handler
     def unauthorized():
         return redirect(url_for("main.landing"))
@@ -89,6 +89,23 @@ def create_app():
     for r in app.url_map.iter_rules():
         print(r, "→", r.endpoint)
     print("=========================")
+
+    # ======================================================
+    # 🔐 セキュリティヘッダー追加（HSTS / XFO / nosniff）
+    # ======================================================
+    @app.after_request
+    def add_security_headers(response):
+        # HSTS（HTTPS 強制）※本番のみ Secure と併用
+        response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
+
+        # クリックジャッキング対策（iframe埋め込み不可）
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+
+        # MIME スニッフィング防止
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+
+        # ※ Content-Security-Policy は後日対応（現在は未適用）
+        return response
 
     return app
 
