@@ -9,9 +9,6 @@
 </div>
 {% endif %}
 
-<!-- Safari 対策：hidden input で token を渡す -->
-<input type="hidden" id="csrf-token-source" value="{{ csrf_token() }}">
-
 <div class="week-nav">
   <a href="{{ url_for('schedule.schedule', week=week_offset - 1) }}">＜ 前の週</a>
   <strong>{{ dates[0].strftime("%m/%d") }} ～ {{ dates[-1].strftime("%m/%d") }}</strong>
@@ -42,10 +39,15 @@
 {% endblock %}
 
 {% block scripts %}
+
+<!-- 🔥 方法①：CSRF & WEEK_OFFSET を Flask → JS に直接埋め込む最安定方式 -->
 <script>
-  const csrf_token = document.getElementById("csrf-token-source").value;
-  const WEEK_OFFSET = JSON.parse('{{ week_offset | tojson }}');
+  // @ts-nocheck
+  window.CSRF_TOKEN = "{{ csrf_token() }}";
+  window.WEEK_OFFSET = Number("{{ week_offset }}");
 </script>
 
+<!-- schedule.js はこの下で確実に CSRF_TOKEN を参照可能 -->
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+
 {% endblock %}
