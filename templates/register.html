@@ -14,18 +14,14 @@
 
 <form method="POST" novalidate>
 
-  <!-- 🔐 Flask-WTF 正式の CSRF hidden field -->
-  {{ csrf_field() }}
+  <!-- 🔐 CSRF hidden input（これだけでOK） -->
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <label>ユーザー名：</label>
   <input type="text" name="username" placeholder="例：Taro" required>
 
   <label>PIN（4〜6桁）：</label>
-  <input type="password"
-         name="pin"
-         placeholder="例：1234"
-         inputmode="numeric"
-         required>
+  <input type="password" name="pin" placeholder="例：1234" inputmode="numeric" required>
 
   <button type="submit">
     {% if mode == 'login' %}ログイン{% else %}登録して始める{% endif %}

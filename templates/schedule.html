@@ -3,17 +3,15 @@
 
 {% block content %}
 
-<!-- 🔸 過去週の場合のメッセージ -->
 {% if is_past_week %}
 <div class="info-banner" style="text-align:center; margin-bottom: 10px; color:#666; font-size:14px;">
   この週は<strong>過去の週</strong>のため、編集できません。
 </div>
 {% endif %}
 
-<!-- Hidden CSRF token for JS（Safari 対策版） -->
+<!-- Safari 対策：hidden input で token を渡す -->
 <input type="hidden" id="csrf-token-source" value="{{ csrf_token() }}">
 
-<!-- 週ナビゲーション -->
 <div class="week-nav">
   <a href="{{ url_for('schedule.schedule', week=week_offset - 1) }}">＜ 前の週</a>
   <strong>{{ dates[0].strftime("%m/%d") }} ～ {{ dates[-1].strftime("%m/%d") }}</strong>
@@ -24,8 +22,8 @@
   {% for d in dates %}
   {% set saved_type = saved_dict.get(d.strftime('%Y-%m-%d')) %}
   <div class="date-row"
-       data-date="{{ d.strftime('%Y-%m-%d') }}"
-       data-prev-slot="{{ saved_dict.get(d.strftime('%Y-%m-%d'), '') }}">
+       data-date="{{ d.strftime('%Y-%m-%d') }}">
+
     <span class="date-label">{{ d.strftime('%m/%d(%a)') }}</span>
 
     <button class="time-btn {% if saved_type == '昼' %}selected{% endif %}" data-slot="day" {% if is_past_week %}disabled{% endif %}>昼</button>
@@ -44,13 +42,10 @@
 {% endblock %}
 
 {% block scripts %}
-
 <script>
-  // 🔐 Safari でも必ず取得できる形式に変更（最重要）
   const csrf_token = document.getElementById("csrf-token-source").value;
   const WEEK_OFFSET = JSON.parse('{{ week_offset | tojson }}');
 </script>
 
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
-
 {% endblock %}

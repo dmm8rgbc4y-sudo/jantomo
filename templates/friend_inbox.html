@@ -11,8 +11,8 @@
     {% for r in requests %}
       <form method="POST" class="request-card">
 
-        <!-- 🔐 Flask-WTF 正式の CSRF hidden field（各フォームに必要） -->
-        {{ csrf_field() }}
+        <!-- 🔐 CSRFトークン（各フォームごとに必要） -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="request-info">
           <div class="request-icon">{{ r.username[0] }}</div>

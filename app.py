@@ -1,34 +1,35 @@
 # app.py
 
-from flask import Flask, redirect, url_for, send_from_directory
+from flask import Flask, redirect, url_for, send_from_directory, request
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect   # 🔐 CSRFProtect を追加
+from flask_wtf.csrf import CSRFProtect
 import os
 
-# 🔹 db を models から読み込む
 from models.db import db
 
 login_manager = LoginManager()
 migrate = Migrate()
-csrf = CSRFProtect()   # 🔐 CSRFインスタンス作成
+csrf = CSRFProtect()
 
 
 def create_app():
     app = Flask(__name__)
     app.secret_key = "secret-key"
 
-    # --- GA4 設定 ---
+    # --- GA4 ---
     app.config["GA4_ID"] = "G-0JVEJFNN2L"
 
-    # --- Cookie セキュリティ属性（最優先①対応） ---
+    # --- Cookie セキュリティ属性（本番だけ Secure=True） ---
+    is_production = os.environ.get("RENDER") == "true"
+
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SECURE=True,        # HTTPS のみ送信（Render 本番 OK）
-        SESSION_COOKIE_SAMESITE="Lax",     # CSRF 攻撃を防止
+        SESSION_COOKIE_SECURE=is_production,  # ← ローカルでは False
+        SESSION_COOKIE_SAMESITE="Lax",
     )
 
-    # --- DB格納場所の設定 ---
+    # --- DB ---
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     default_db = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'jantomo.db')}"
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -40,20 +41,20 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
-    csrf.init_app(app)          # 🔐 CSRF を Flask に有効化（最優先②対応）
+    csrf.init_app(app)   # ← CSRFProtect を有効化（最重要）
 
-    # --- GA4 をテンプレートへ渡す ---
+    # --- GA4 テンプレート ---
     @app.context_processor
     def inject_ga4():
         return dict(GA4_ID=app.config.get("GA4_ID"))
 
-    # --- モデル読み込み ---
+    # --- Models ---
     from models.models import User
     from models.friend import Friend
     from models.friend_request import FriendRequest
     from models.device import Device
 
-    # --- Blueprint ---
+    # --- Blueprints ---
     from routes.auth import auth_bp
     from routes.schedule import schedule_bp
     from routes.profile import profile_bp
@@ -68,7 +69,20 @@ def create_app():
     app.register_blueprint(maintenance_bp)
     app.register_blueprint(main_bp)
 
-    # --- Flask-Login 未ログイン時 ---
+    # ---- /register と /login の POST 時だけ auto_login を止める ----
+    @app.before_request
+    def skip_auto_login_for_auth_post():
+        if request.path.startswith('/register') and request.method == 'POST':
+            return
+        if request.path.startswith('/login') and request.method == 'POST':
+            return
+
+    # --- auto_login / LP誘導 ---
+    from routes.auth import auto_login, force_register_if_not_logged_in
+    app.before_request(auto_login)
+    app.before_request(force_register_if_not_logged_in)
+
+    # --- Flask-Login ---
     @login_manager.unauthorized_handler
     def unauthorized():
         return redirect(url_for("main.landing"))
@@ -77,43 +91,24 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # --- トップページ ---
+    # --- index ---
     @app.route("/")
     def index():
         if current_user.is_authenticated:
             return redirect(url_for("schedule.weekly"))
         return redirect(url_for("main.landing"))
 
-    # --- Service Worker ---
+    # --- SW ---
     @app.route("/sw.js")
     def service_worker():
         return send_from_directory("static/js", "sw.js")
 
-    # --- auto_login / LP誘導 ---
-    from routes.auth import auto_login, force_register_if_not_logged_in
-    app.before_request(auto_login)
-    app.before_request(force_register_if_not_logged_in)
-
-    # --- Routes debug print ---
-    print("=== Registered Routes ===")
-    for r in app.url_map.iter_rules():
-        print(r, "→", r.endpoint)
-    print("=========================")
-
-    # ======================================================
-    # 🔐 セキュリティヘッダー追加（HSTS / XFO / nosniff）
-    # ======================================================
+    # --- Security Headers ---
     @app.after_request
     def add_security_headers(response):
-        # HSTS（HTTPS 強制）※本番のみ Secure と併用
         response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
-
-        # クリックジャッキング対策
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-
-        # MIME スニッフィング防止
         response.headers['X-Content-Type-Options'] = 'nosniff'
-
         return response
 
     return app

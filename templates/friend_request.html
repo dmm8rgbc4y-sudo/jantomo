@@ -8,10 +8,10 @@
 </header>
 
 <main class="friend-request-container">
-  <form method="POST">
+  <form method="POST" novalidate>
 
-    <!-- 🔐 Flask-WTF 正式の hidden CSRF field -->
-    {{ csrf_field() }}
+    <!-- 🔐 CSRFトークン（UIに出ない hidden input） -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <label for="username">ユーザー名を入力してください：</label>
     <input type="text" name="username" id="username" placeholder="例：Taro" required>
