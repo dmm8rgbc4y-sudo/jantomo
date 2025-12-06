@@ -22,8 +22,8 @@
 
         <form method="POST" action="{{ url_for('friend.friend_delete') }}">
 
-          <!-- 🔐 CSRF トークン（必須） -->
-          {{ csrf_token() }}
+          <!-- 🔐 Flask-WTF 正式の CSRF hidden field -->
+          {{ csrf_field() }}
 
           <input type="hidden" name="friend_id" value="{{ f.id }}">
           <button type="submit" class="delete-btn">削除</button>

@@ -42,7 +42,6 @@
     </script>
     {% endif %}
     <!-- ▲ GA4 -->
-
 </head>
 
 <body>
@@ -103,10 +102,8 @@
     <!-- iOS A2HS -->
     <script src="{{ url_for('static', filename='js/ios_a2hs.js') }}"></script>
 
-    <!-- ▼ schedule.js（scheduleページ限定） -->
+    <!-- ▼ schedule.js（旧方式：削除済） -->
     {% if request.endpoint == 'schedule.schedule' %}
-      <script data-week="{{ week_offset | tojson }}"></script>
-      <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
     {% endif %}
     <!-- ▲ -->
 

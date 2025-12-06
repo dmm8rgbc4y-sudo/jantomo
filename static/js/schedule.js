@@ -1,20 +1,16 @@
 // ==========================================
-// WEEK_OFFSET を base.html の data 属性から取得（重要）
-// ==========================================
-const WEEK_OFFSET = JSON.parse(
-  document.querySelector('script[data-week]').dataset.week
-);
-
-// ==========================================
-// schedule.js（2025-11 完全安定版 + CSRF対応版）
+// schedule.js（2025-12 完全安定版 + CSRF/Safari 対応版）
 // ・Flash成功表示100%保証
 // ・週またぎ保持
 // ・一括解除バグゼロ
-// ・VSCode警告ゼロ
-// ・CSRF 完全対応（POSTフォームに付与）
+// ・Safari の null 参照バグ修正
+// ・CSRF hidden フィールド付与
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // WEEK_OFFSET と csrf_token は schedule.html 側で定義される
+  // console.log("WEEK_OFFSET:", WEEK_OFFSET, "CSRF:", csrf_token);
+
   const rows = document.querySelectorAll(".date-row");
   const saveBtn = document.getElementById("save-btn");
 
@@ -110,24 +106,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // -----------------------------------------------
-    // 🟩 Flash を確実に表示するため fetch を使わず
-    // ブラウザ標準フォーム送信に切り替える
-    // ＋ CSRF hidden を付与
-    // -----------------------------------------------
     try {
       const form = document.createElement("form");
       form.method = "POST";
       form.action = `/schedule/save?week=${WEEK_OFFSET}`;
 
-      // 🔐 CSRF hidden input を追加
+      // 🔐 CSRF hidden input
       const csrf = document.createElement("input");
       csrf.type = "hidden";
       csrf.name = "csrf_token";
       csrf.value = csrf_token;
       form.appendChild(csrf);
 
-      // payload 追加
+      // payload
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = "payload";
