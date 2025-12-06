@@ -14,6 +14,10 @@
 
 <!-- ★ ブラウザのバリデーションを無効化 -->
 <form method="POST" novalidate>
+
+  <!-- 🔐 CSRF トークン追加（必須） -->
+  {{ csrf_token() }}
+
   <label>ユーザー名：</label>
   <input type="text" name="username" placeholder="例：Taro" required>
 

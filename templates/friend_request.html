@@ -9,6 +9,10 @@
 
 <main class="friend-request-container">
   <form method="POST">
+
+    <!-- 🔐 CSRF トークン追加 -->
+    {{ csrf_token() }}
+
     <label for="username">ユーザー名を入力してください：</label>
     <input type="text" name="username" id="username" placeholder="例：Taro" required>
     <button type="submit">申請する</button>

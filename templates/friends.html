@@ -19,10 +19,16 @@
       <div class="friend-item">
         <div class="friend-icon">{{ f.username[0] }}</div>
         <div class="friend-name">{{ f.username }}</div>
+
         <form method="POST" action="{{ url_for('friend.friend_delete') }}">
+
+          <!-- 🔐 CSRF トークン（必須） -->
+          {{ csrf_token() }}
+
           <input type="hidden" name="friend_id" value="{{ f.id }}">
           <button type="submit" class="delete-btn">削除</button>
         </form>
+
       </div>
     {% endfor %}
   {% else %}

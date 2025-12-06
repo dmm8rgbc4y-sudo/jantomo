@@ -51,9 +51,14 @@
 {% endblock %}
 
 {% block scripts %}
+
+<!-- 🔐 schedule.js に渡す CSRF トークン -->
 <script>
+  const csrf_token = "{{ csrf_token() }}";
   const WEEK_OFFSET = JSON.parse('{{ week_offset | tojson }}');
 </script>
 
+<!-- schedule.js はこの下で読み込む必要がある -->
 <script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+
 {% endblock %}

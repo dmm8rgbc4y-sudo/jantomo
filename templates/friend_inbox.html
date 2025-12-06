@@ -10,11 +10,17 @@
   {% if requests %}
     {% for r in requests %}
       <form method="POST" class="request-card">
+
+        <!-- 🔐 CSRF トークン（各フォームに必須） -->
+        {{ csrf_token() }}
+
         <div class="request-info">
           <div class="request-icon">{{ r.username[0] }}</div>
           <div class="request-name">{{ r.username }} さんから申請が届いています</div>
         </div>
+
         <input type="hidden" name="from_user_id" value="{{ r.id }}">
+
         <div class="request-actions">
           <button type="submit" name="action" value="accept" class="accept-btn">承認</button>
           <button type="submit" name="action" value="reject" class="reject-btn">拒否</button>

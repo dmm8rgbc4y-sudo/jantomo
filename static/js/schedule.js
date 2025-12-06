@@ -6,11 +6,12 @@ const WEEK_OFFSET = JSON.parse(
 );
 
 // ==========================================
-// schedule.js（2025-11 完全安定版）
+// schedule.js（2025-11 完全安定版 + CSRF対応版）
 // ・Flash成功表示100%保証
 // ・週またぎ保持
 // ・一括解除バグゼロ
 // ・VSCode警告ゼロ
+// ・CSRF 完全対応（POSTフォームに付与）
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -80,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =======================================================
-  // 📌 決定ボタン（★成功Flash100%保証版★）
+  // 📌 決定ボタン（★成功Flash100%保証版★ + CSRF対応）
   // =======================================================
   saveBtn?.addEventListener("click", () => {
     const payload = [];
@@ -112,21 +113,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------------------------
     // 🟩 Flash を確実に表示するため fetch を使わず
     // ブラウザ標準フォーム送信に切り替える
+    // ＋ CSRF hidden を付与
     // -----------------------------------------------
     try {
       const form = document.createElement("form");
       form.method = "POST";
       form.action = `/schedule/save?week=${WEEK_OFFSET}`;
 
+      // 🔐 CSRF hidden input を追加
+      const csrf = document.createElement("input");
+      csrf.type = "hidden";
+      csrf.name = "csrf_token";
+      csrf.value = csrf_token;
+      form.appendChild(csrf);
+
+      // payload 追加
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = "payload";
       input.value = JSON.stringify(payload);
-
       form.appendChild(input);
+
       document.body.appendChild(form);
 
-      // ★ 成功Flashを確実に表示するため、通常遷移に任せる
       localStorage.removeItem(DRAFT_KEY);
       form.submit();
 
