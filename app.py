@@ -3,6 +3,7 @@
 from flask import Flask, redirect, url_for, send_from_directory
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect   # 🔐 CSRFProtect を追加
 import os
 
 # 🔹 db を models から読み込む
@@ -10,6 +11,7 @@ from models.db import db
 
 login_manager = LoginManager()
 migrate = Migrate()
+csrf = CSRFProtect()   # 🔐 CSRFインスタンス作成
 
 
 def create_app():
@@ -18,6 +20,13 @@ def create_app():
 
     # --- GA4 設定 ---
     app.config["GA4_ID"] = "G-0JVEJFNN2L"
+
+    # --- Cookie セキュリティ属性（最優先①対応） ---
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SECURE=True,        # HTTPS のみ送信（Render 本番 OK）
+        SESSION_COOKIE_SAMESITE="Lax",     # CSRF 攻撃を防止
+    )
 
     # --- DB格納場所の設定 ---
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -31,6 +40,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)          # 🔐 CSRF を Flask に有効化（最優先②対応）
 
     # --- GA4 をテンプレートへ渡す ---
     @app.context_processor
@@ -98,13 +108,12 @@ def create_app():
         # HSTS（HTTPS 強制）※本番のみ Secure と併用
         response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
 
-        # クリックジャッキング対策（iframe埋め込み不可）
+        # クリックジャッキング対策
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 
         # MIME スニッフィング防止
         response.headers['X-Content-Type-Options'] = 'nosniff'
 
-        # ※ Content-Security-Policy は後日対応（現在は未適用）
         return response
 
     return app
